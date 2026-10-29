@@ -1,0 +1,35 @@
+{
+  "version": "1",
+  "codes": {
+    "policy_violation": {
+      "risk": true,
+      "description": "The answer states something the query lists in must_not_claim.",
+      "detected_by": "checks.must_not_claim (token coverage with negation polarity)"
+    },
+    "unsupported_claim": {
+      "risk": true,
+      "description": "Content the retrieved evidence does not support: low overall grounding, a low-support sentence, or a number absent from the evidence and the question.",
+      "detected_by": "checks.grounding"
+    },
+    "overconfident_tone": {
+      "risk": true,
+      "description": "A non-negated certainty marker (guarantee, definitely, ...) that commits beyond the evidence.",
+      "detected_by": "checks.certainty_markers"
+    },
+    "missed_key_fact": {
+      "risk": false,
+      "description": "None of the must_include_any phrases is present.",
+      "detected_by": "checks.must_include"
+    },
+    "retrieval_miss": {
+      "risk": false,
+      "description": "No expected document is in the top k. A retrieval fault, not the answer's.",
+      "detected_by": "checks.retrieval_hit"
+    },
+    "irrelevant_answer": {
+      "risk": false,
+      "description": "Too few answer content tokens appear in the question or the evidence.",
+      "detected_by": "checks.relevance"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+# Comparative review prompt. Bump `version` on any change; the version and the
+# SHA-256 of this template are logged with every call and stored in the database.
+version = "1"
+name = "comparative_review"
+
+system = """
+You are a strict reviewer of customer-support answers. For each query you get the user's
+question, its risk level, the evidence passages a retriever returned, several candidate
+answers under neutral labels, and the results of automated rule checks.
+
+Judge only against the evidence shown. Do not use outside knowledge, do not look anything
+up, and do not suggest which prompt variant should be deployed. Length is not a criterion:
+a short answer that covers the key fact is better than a long one that pads.
+
+For every query and every answer label, return:
+- faithfulness 1-5: 5 = every statement is supported by the evidence; 3 = mostly supported
+  with a minor unsupported detail; 1 = contradicts the evidence or invents facts.
+- clarity 1-5: 5 = direct, complete and easy to act on; 3 = understandable but vague or
+  missing a step; 1 = confusing or off topic.
+- overclaim_flags: up to 3 short quotes where the answer promises, guarantees or claims an
+  action the evidence does not allow. Empty list if none.
+- winner: the label of the better answer for this query, or "tie".
+- justification: at most 2 sentences, citing the evidence.
+
+Treat the rule-check results as hints, not as ground truth; they are simple heuristics.
+Return the result only through the provided tool or JSON schema.
+"""
+
+query_block = """
+### Query {query_id} (risk: {risk_level})
+Question: {question}
+
+Evidence:
+{evidence}
+
+Answers:
+{answers}
+
+Rule checks:
+{checks}
+"""

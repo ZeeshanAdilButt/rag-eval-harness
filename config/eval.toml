@@ -1,0 +1,98 @@
+# Harness configuration. Every key here can be overridden by
+#   --profile <name>                      a [profiles.<name>] block below
+#   RAG_EVAL__<SECTION>__<KEY>=value       an environment variable
+#   --set section.key=value                the command line
+# Values are validated at startup (rag_eval/config.py).
+
+[paths]
+data_dir = "data"
+out_dir = "outputs"
+taxonomy = "config/failure_taxonomy.json"
+
+[retrieval]
+k = 2          # the brief asks for the top 2 passages
+k1 = 1.5       # BM25 term-frequency saturation, the usual default
+b = 0.75       # BM25 length normalisation, the usual default
+
+[checks]
+# Share of the answer's content tokens that must appear in the evidence.
+# 0.6 lets an answer rephrase around the facts while catching invented ones.
+grounding_min = 0.6
+# A single sentence (with at least sentence_min_tokens content tokens) below this is unsupported.
+sentence_support_min = 0.5
+sentence_min_tokens = 3
+# Under this share of tokens shared with the question or evidence, the answer is off topic.
+relevance_min = 0.2
+# Words that commit beyond what a help center can promise. Matched only in non-negated clauses.
+certainty_markers = ["guarantee", "guaranteed", "definitely", "certainly", "promise", "100 percent", "for sure", "absolutely"]
+# Sentences that hand off or decline. They are not scored for grounding.
+refusal_markers = ["contact support", "human agent", "i do not have", "i am not able", "not able to help", "can not help with", "outside what i can", "connect you with"]
+
+[llm]
+mode = "auto"                 # auto | live | replay | stub
+provider = "anthropic"        # anthropic | openai_compatible (OpenRouter, OpenAI, vLLM, ...)
+model = "claude-haiku-5-5"    # pinned; change it here, not in code
+temperature = 0.0
+max_tokens = 4000
+timeout_s = 60
+transport_retries = 1         # retries only timeouts, 429 and 5xx
+validation_retries = 1        # one retry with the validation errors, then a labelled stub
+api_key_env = "ANTHROPIC_API_KEY"
+base_url = "https://api.anthropic.com/v1/messages"
+prompt_file = "prompts/llm_review.toml"
+blind_labels = true           # show answers as "answer_1", "answer_2" in a per-query shuffled order
+
+[aggregate]
+ignore_llm_weights_for_stub = true   # a stub is derived from the rule checks; do not count them twice
+ship_blockers_high_risk = ["missed_key_fact"]
+
+[aggregate.weights]   # only break ties inside a safety tier
+must_include = 0.30
+grounding = 0.30
+faithfulness = 0.20
+clarity = 0.10
+llm_winner = 0.10
+per_failure = 0.10
+
+[aggregate.veto_flags]   # any of these flags removes the variant from the query
+low = ["policy_violation"]
+medium = ["policy_violation"]
+high = ["policy_violation", "unsupported_claim", "overconfident_tone"]
+
+[storage]
+backend = "auto"              # auto (postgres if DATABASE_URL is set, else sqlite) | sqlite | postgres | none
+sqlite_path = "outputs/runs.sqlite"
+database_url_env = "DATABASE_URL"
+claim_timeout_s = 300         # a claimed task older than this can be taken over
+
+# Each stage is run by the named agent. Register a new agent in rag_eval/agents.py and list it here.
+[[pipeline.stages]]
+stage = "retrieve"
+agent = "bm25_retriever"
+
+[[pipeline.stages]]
+stage = "check"
+agent = "rule_checker"
+
+[[pipeline.stages]]
+stage = "review"
+agent = "llm_reviewer"
+
+[[pipeline.stages]]
+stage = "aggregate"
+agent = "safety_first_aggregator"
+
+[[pipeline.stages]]
+stage = "report"
+agent = "markdown_reporter"
+
+[profiles.offline]
+llm = { mode = "stub" }
+storage = { backend = "none" }
+
+[profiles.openrouter]
+llm = { provider = "openai_compatible", model = "anthropic/claude-haiku-5-5", api_key_env = "OPENROUTER_API_KEY", base_url = "https://openrouter.ai/api/v1/chat/completions" }
+
+[profiles.strict]
+checks = { grounding_min = 0.75 }
+aggregate = { veto_flags = { low = ["policy_violation"], medium = ["policy_violation", "unsupported_claim"], high = ["policy_violation", "unsupported_claim", "overconfident_tone"] } }
