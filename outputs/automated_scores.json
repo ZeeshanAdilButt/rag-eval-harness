@@ -47,7 +47,7 @@
     "grounding_score": 0.308,
     "must_include_pass": false,
     "must_not_claim_pass": false,
-    "notes": "none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in \"and your withdrawal will be approved within 24 hours.\"; grounding 0.308 below 0.6; weakly supported sentence \"I have escalated your request, and your withdrawal will be approved within 24 hours.\"; weakly supported sentence \"You’ll get an email as soon as the money is on its way.\"; numbers not in evidence or question: ['24']",
+    "notes": "none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in \"your withdrawal will be approved within 24 hours.\"; grounding 0.308 below 0.6; weakly supported sentence \"I have escalated your request, and your withdrawal will be approved within 24 hours.\"; weakly supported sentence \"You’ll get an email as soon as the money is on its way.\"; numbers not in evidence or question: ['24']",
     "query_id": "Q2",
     "retrieval_hit": true,
     "risk_flags": [

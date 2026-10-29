@@ -56,3 +56,8 @@ def retrieve(docs: list[Doc], queries: list[Query], cfg: RetrievalConfig) -> lis
             }
         )
     return results
+
+
+def is_hit(retrieved: list[dict], expected_doc_ids: list[str]) -> bool:
+    """An expected doc counts only if it was retrieved with a positive score."""
+    return any(r["doc_id"] in expected_doc_ids and r.get("score", 1.0) > 0 for r in retrieved)

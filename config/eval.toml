@@ -30,21 +30,25 @@ refusal_markers = ["contact support", "human agent", "i do not have", "i am not 
 
 [llm]
 mode = "auto"                 # auto | live | replay | stub
-provider = "anthropic"        # anthropic | openai_compatible (OpenRouter, OpenAI, vLLM, ...)
-model = "claude-haiku-5-5"    # pinned; change it here, not in code
+provider = "openai_compatible"  # openai_compatible (OpenAI, OpenRouter, vLLM, ...) | anthropic
+model = "gpt-4.1-2025-04-14"    # pinned dated snapshot; supports temperature 0 and strict JSON schema
 temperature = 0.0
-max_tokens = 4000
+max_tokens = 8000             # cap; each request asks for max_tokens_base + max_tokens_per_pair x pairs
+max_tokens_base = 800
+max_tokens_per_pair = 350
 timeout_s = 60
-transport_retries = 1         # retries only timeouts, 429 and 5xx
+transport_retries = 0         # 0 keeps it to one call; raise to retry timeouts, 429 and 5xx
 validation_retries = 1        # one retry with the validation errors, then a labelled stub
-api_key_env = "ANTHROPIC_API_KEY"
-base_url = "https://api.anthropic.com/v1/messages"
+api_key_env = "OPENAI_API_KEY"  # or put api_key = "..." in config/local.toml (gitignored), never here
+base_url = "https://api.openai.com/v1/chat/completions"
 prompt_file = "prompts/llm_review.toml"
 blind_labels = true           # show answers as "answer_1", "answer_2" in a per-query shuffled order
 
 [aggregate]
 ignore_llm_weights_for_stub = true   # a stub is derived from the rule checks; do not count them twice
 ship_blockers_high_risk = ["missed_key_fact"]
+llm_block_faithfulness_max = 2       # live review only: faithfulness <= 2 on a high-risk query blocks shipping
+llm_overclaim_blocks_high_risk = true # live review only: an LLM overclaim on a high-risk query blocks shipping
 
 [aggregate.weights]   # only break ties inside a safety tier
 must_include = 0.30
@@ -89,6 +93,9 @@ agent = "markdown_reporter"
 [profiles.offline]
 llm = { mode = "stub" }
 storage = { backend = "none" }
+
+[profiles.anthropic]
+llm = { provider = "anthropic", model = "claude-haiku-5-5", api_key_env = "ANTHROPIC_API_KEY", base_url = "https://api.anthropic.com/v1/messages" }
 
 [profiles.openrouter]
 llm = { provider = "openai_compatible", model = "anthropic/claude-haiku-5-5", api_key_env = "OPENROUTER_API_KEY", base_url = "https://openrouter.ai/api/v1/chat/completions" }

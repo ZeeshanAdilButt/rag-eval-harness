@@ -2,7 +2,7 @@
 
 Precedence, lowest to highest:
   1. defaults in these models
-  2. config/eval.toml
+  2. config/eval.toml, then config/local.toml next to it if present (gitignored: keys, local URLs)
   3. [profiles.<name>] in that file (--profile)
   4. environment variables RAG_EVAL__<SECTION>__<KEY> (for example RAG_EVAL__LLM__MODEL)
   5. --set section.key=value on the command line
@@ -19,7 +19,7 @@ import tomllib
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError
 
 ENV_PREFIX = "RAG_EVAL__"
 
@@ -51,15 +51,20 @@ class ChecksConfig(_Section):
 
 class LLMConfig(_Section):
     mode: Literal["auto", "live", "replay", "stub"] = "auto"
-    provider: Literal["anthropic", "openai_compatible"] = "anthropic"
-    model: str = "claude-haiku-5-5"
+    provider: Literal["anthropic", "openai_compatible"] = "openai_compatible"
+    model: str = "gpt-4.1-2025-04-14"
     temperature: float = Field(0.0, ge=0, le=1)
-    max_tokens: int = Field(4000, ge=256)
+    max_tokens: int = Field(8000, ge=256)  # cap; the request asks for max_tokens_base + per pair, up to this
+    max_tokens_base: int = Field(800, ge=0)
+    max_tokens_per_pair: int = Field(350, ge=50)
     timeout_s: float = Field(60, gt=0)
-    transport_retries: int = Field(1, ge=0, le=3)
+    transport_retries: int = Field(0, ge=0, le=3)
     validation_retries: int = Field(1, ge=0, le=1)
-    api_key_env: str = "ANTHROPIC_API_KEY"
-    base_url: str = "https://api.anthropic.com/v1/messages"
+    api_key_env: str = "OPENAI_API_KEY"
+    # Prefer the environment variable. A key here must live in config/local.toml (gitignored);
+    # it is stored as a secret and never printed, logged or saved with the run.
+    api_key: SecretStr | None = None
+    base_url: str = "https://api.openai.com/v1/chat/completions"
     prompt_file: str = "prompts/llm_review.toml"
     blind_labels: bool = True
 
@@ -83,6 +88,10 @@ class AggregateConfig(_Section):
         }
     )
     ship_blockers_high_risk: list[str] = Field(default_factory=lambda: ["missed_key_fact"])
+    # The LLM never vetoes (it does not make the decision), but on a high-risk query a live
+    # review with faithfulness at or below this, or any overclaim, blocks "ready to ship".
+    llm_block_faithfulness_max: int = Field(2, ge=0, le=5)
+    llm_overclaim_blocks_high_risk: bool = True
     ignore_llm_weights_for_stub: bool = True
 
 
@@ -121,7 +130,7 @@ class Config(_Section):
 
     def digest(self) -> str:
         return hashlib.sha256(
-            json.dumps(self.model_dump(), sort_keys=True).encode()
+            json.dumps(self.model_dump(mode="json"), sort_keys=True).encode()
         ).hexdigest()
 
     def scoring_view(self) -> dict[str, Any]:
@@ -170,6 +179,10 @@ def load_config(
     if path is not None and path.exists():
         with path.open("rb") as fh:
             tree = tomllib.load(fh)
+        local = path.with_name("local.toml")
+        if local.exists():
+            with local.open("rb") as fh:
+                tree = _deep_merge(tree, tomllib.load(fh))
     profiles = tree.pop("profiles", {})
     if profile:
         if profile not in profiles:

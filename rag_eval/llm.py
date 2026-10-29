@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import time
 import tomllib
 import urllib.error
@@ -72,15 +73,27 @@ def label_order(query_id: str, variants: list[str], blind: bool) -> dict[str, st
     return {(f"answer_{i + 1}" if blind else v): v for i, v in enumerate(order)}
 
 
+def _esc(text: str) -> str:
+    """Minimal escaping so answer or evidence text cannot close or forge a tag."""
+    return text.replace("<", "&lt;").replace(">", "&gt;")
+
+
 def build_prompt(inputs, retrieval: list[dict], scores: list[dict], tmpl: PromptTemplate, blind: bool) -> tuple[str, dict[str, dict[str, str]]]:
     by_query = {r["query_id"]: r["retrieved"] for r in retrieval}
     by_pair = {(s["query_id"], s["variant"]): s for s in scores}
+    docs = inputs.docs_by_id
     blocks, labels = [], {}
     for q in inputs.queries:
         mapping = label_order(q.query_id, inputs.variants, blind)
         labels[q.query_id] = mapping
-        evidence = "\n".join(f"- [{d['doc_id']}] {d['title']}: {d['text']}" for d in by_query[q.query_id])
-        answers = "\n".join(f"- {label}: {inputs.answers[q.query_id][v]}" for label, v in mapping.items())
+        retrieved = by_query[q.query_id]
+        lines = [f"- [{d['doc_id']}] {_esc(d['title'])}: {_esc(d['text'])}" for d in retrieved]
+        got = {d["doc_id"] for d in retrieved}
+        if q.expected_doc_ids and not got & set(q.expected_doc_ids):
+            lines += [f"- [{i}] {_esc(docs[i].title)}: {_esc(docs[i].text)} (expected doc, not retrieved)"
+                      for i in q.expected_doc_ids if i in docs]
+        evidence = "<evidence>\n" + "\n".join(lines) + "\n</evidence>"
+        answers = "\n".join(f'<answer label="{label}">{_esc(inputs.answers[q.query_id][v])}</answer>' for label, v in mapping.items())
         checks = "\n".join(
             f"- {label}: must_include={by_pair[(q.query_id, v)]['must_include_pass']}, "
             f"must_not_claim={by_pair[(q.query_id, v)]['must_not_claim_pass']}, "
@@ -113,13 +126,13 @@ def response_schema(query_ids: list[str], label_sets: list[list[str]]) -> dict:
                     "type": "object",
                     "properties": {
                         "query_id": {"type": "string", "enum": query_ids},
+                        "justification": {"type": "string", "maxLength": 600},
                         "winner": {"type": "string", "enum": [*labels, "tie"]},
                         "faithfulness": per_label(score),
                         "clarity": per_label(score),
                         "overclaim_flags": per_label({"type": "array", "items": {"type": "string", "maxLength": 200}, "maxItems": 3}),
-                        "justification": {"type": "string", "maxLength": 600},
                     },
-                    "required": ["query_id", "winner", "faithfulness", "clarity", "overclaim_flags", "justification"],
+                    "required": ["query_id", "justification", "winner", "faithfulness", "clarity", "overclaim_flags"],
                     "additionalProperties": False,
                 },
             }
@@ -176,6 +189,15 @@ def validate_reply(payload: object, labels: dict[str, dict[str, str]]) -> tuple[
     return list(seen.values()), errors
 
 
+def _deblind_text(text: str, m: dict[str, str]) -> str:
+    """Replace any label the model wrote in prose with the backticked variant name."""
+    swap = {l.lower(): v for l, v in m.items() if l != v}
+    if not swap:
+        return text
+    pattern = "(?<![A-Za-z0-9_])(" + "|".join(re.escape(l) for l in sorted(swap, key=len, reverse=True)) + ")(?![A-Za-z0-9_])"
+    return re.sub(pattern, lambda mo: f"`{swap[mo.group(1).lower()]}`", text, flags=re.IGNORECASE)
+
+
 def unblind(reviews: list[Review], labels: dict[str, dict[str, str]]) -> list[dict]:
     out = []
     for r in sorted(reviews, key=lambda r: list(labels).index(r.query_id)):
@@ -187,7 +209,7 @@ def unblind(reviews: list[Review], labels: dict[str, dict[str, str]]) -> list[di
                 "faithfulness": {m[k]: v for k, v in sorted(r.faithfulness.items(), key=lambda kv: m[kv[0]])},
                 "clarity": {m[k]: v for k, v in sorted(r.clarity.items(), key=lambda kv: m[kv[0]])},
                 "overclaim_flags": {m[k]: v for k, v in sorted(r.overclaim_flags.items(), key=lambda kv: m[kv[0]])},
-                "justification": r.justification,
+                "justification": _deblind_text(r.justification, m),
             }
         )
     return out
@@ -260,6 +282,18 @@ class AnthropicProvider:
         return ProviderReply(text, data.get("model"), data.get("stop_reason"), usage.get("input_tokens"), usage.get("output_tokens"))
 
 
+REASONING_PREFIXES = ("o1", "o3", "o4", "gpt-5")
+
+
+def _strict_schema(node: object) -> object:
+    """Drop length and count keywords some strict-mode providers reject; validate_reply enforces them."""
+    if isinstance(node, dict):
+        return {k: _strict_schema(v) for k, v in node.items() if k not in ("maxLength", "minLength", "minItems", "maxItems")}
+    if isinstance(node, list):
+        return [_strict_schema(v) for v in node]
+    return node
+
+
 class OpenAICompatibleProvider:
     """OpenRouter, OpenAI, vLLM, Ollama: anything that speaks /chat/completions with json_schema."""
 
@@ -267,10 +301,13 @@ class OpenAICompatibleProvider:
 
     def complete(self, system: str, user: str, schema: dict, cfg: LLMConfig, api_key: str) -> ProviderReply:
         body = {
-            "model": cfg.model, "max_tokens": cfg.max_tokens, "temperature": cfg.temperature,
+            "model": cfg.model, "max_completion_tokens": cfg.max_tokens,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-            "response_format": {"type": "json_schema", "json_schema": {"name": "review", "strict": True, "schema": schema}},
+            "response_format": {"type": "json_schema", "json_schema": {"name": "review", "strict": True, "schema": _strict_schema(schema)}},
         }
+        # Reasoning models (o-series, gpt-5) reject a temperature; the rest get the pinned 0.
+        if not cfg.model.split("/")[-1].startswith(REASONING_PREFIXES):
+            body["temperature"] = cfg.temperature
         data = _post(cfg.base_url, {"authorization": f"Bearer {api_key}"}, body, cfg.timeout_s)
         choice = (data.get("choices") or [{}])[0]
         if choice.get("finish_reason") == "length":
@@ -286,6 +323,34 @@ PROVIDERS: dict[str, Provider] = {"anthropic": AnthropicProvider(), "openai_comp
 
 
 # ---------------------------------------------------------------- cache and orchestration
+
+
+def effective_max_tokens(cfg: LLMConfig, n_queries: int, n_variants: int) -> int:
+    """Ask for what the pairs need, never more than the configured cap."""
+    return min(cfg.max_tokens, cfg.max_tokens_base + cfg.max_tokens_per_pair * n_queries * n_variants)
+
+
+def effective_cfg(cfg: LLMConfig, inputs) -> LLMConfig:
+    return cfg.model_copy(update={"max_tokens": effective_max_tokens(cfg, len(inputs.queries), len(inputs.variants))})
+
+
+@dataclass
+class Prepared:
+    tmpl: PromptTemplate
+    user: str
+    labels: dict[str, dict[str, str]]
+    schema: dict
+    cfg: LLMConfig  # effective: max_tokens already scaled
+    digest: str
+
+
+def prepare(inputs, retrieval: list[dict], scores: list[dict], cfg: LLMConfig, root: Path) -> Prepared:
+    """Everything that defines the request, shared by the run and by validation."""
+    tmpl = PromptTemplate.load(root / cfg.prompt_file)
+    user, labels = build_prompt(inputs, retrieval, scores, tmpl, cfg.blind_labels)
+    schema = response_schema([q.query_id for q in inputs.queries], [list(m) for m in labels.values()])
+    ecfg = effective_cfg(cfg, inputs)
+    return Prepared(tmpl, user, labels, schema, ecfg, request_hash(tmpl.system, user, schema, ecfg))
 
 
 def request_hash(system: str, user: str, schema: dict, cfg: LLMConfig) -> str:
@@ -310,14 +375,13 @@ class ReviewResult:
 
 
 def run_review(inputs, retrieval, scores, cfg: LLMConfig, root: Path, log_path: Path, provider: Provider | None = None) -> ReviewResult:
-    tmpl = PromptTemplate.load(root / cfg.prompt_file)
-    user, labels = build_prompt(inputs, retrieval, scores, tmpl, cfg.blind_labels)
-    schema = response_schema([q.query_id for q in inputs.queries], [list(m) for m in labels.values()])
-    digest = request_hash(tmpl.system, user, schema, cfg)
+    prep = prepare(inputs, retrieval, scores, cfg, root)
+    tmpl, user, labels, schema, digest = prep.tmpl, prep.user, prep.labels, prep.schema, prep.digest
+    cfg = prep.cfg
     meta = {
         "prompt_sha256": digest, "prompt_name": tmpl.name, "prompt_version": tmpl.version,
         "prompt_template_sha256": tmpl.sha256, "provider": cfg.provider, "model": cfg.model,
-        "temperature": cfg.temperature, "labels": labels,
+        "temperature": cfg.temperature, "max_tokens": cfg.max_tokens, "labels": labels,
     }
     log = read_log(log_path)
     base_line = {"prompt_sha256": digest, "provider": cfg.provider, "model": cfg.model, "temperature": cfg.temperature}
@@ -340,7 +404,7 @@ def run_review(inputs, retrieval, scores, cfg: LLMConfig, root: Path, log_path: 
     if cfg.mode == "stub":
         return stub("stub", "stub mode requested", [])
 
-    api_key = os.environ.get(cfg.api_key_env, "").strip()
+    api_key = (cfg.api_key.get_secret_value() if cfg.api_key else os.environ.get(cfg.api_key_env, "")).strip()
     if not api_key:
         if cfg.mode == "live":
             raise ProviderError("NO_KEY", f"{cfg.api_key_env} is not set and llm.mode is live")

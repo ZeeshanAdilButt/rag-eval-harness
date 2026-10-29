@@ -34,27 +34,32 @@ def render_recommendation(agg: dict, reviews: list[dict], meta: dict) -> str:
     by_review = {r["query_id"]: r for r in reviews}
     lines = ["# Recommendation", ""]
     status = "ready to ship" if agg["ready_to_ship"] else "selected as the safer option, not ready to ship: " + "; ".join(agg["ship_blockers"])
-    lines += [f"**Selected variant: `{sel}`** ({status}).", "", _source_line(meta), ""]
+    lines += [f"**Selected variant: `{sel}`** ({status}).", ""]
+    if agg.get("overall_tie"):
+        lines += [f"**The selection is a tie broken by name.** `{variants[0]}` and `{variants[1]}` are equal on every ranking key, so the harness has no real preference between them.", ""]
+    lines += [_source_line(meta), ""]
 
     lines += ["## Summary", ""]
     llm_cols = not meta["source"].startswith("stub")
     header = ["variant", "query wins", "vetoes", "high-risk vetoes", *TAXONOMY_ORDER, "mean grounding"]
     if llm_cols:
-        header += ["mean faithfulness", "mean clarity"]
+        header += ["mean faithfulness", "mean clarity", "high-risk LLM warnings"]
     rows = []
     for v in variants:
         row = [f"`{v}`", t[v].get("wins", 0), t[v].get("vetoes", 0), t[v].get("high_risk_vetoes", 0), *[t[v].get(c, 0) for c in TAXONOMY_ORDER], agg["mean_grounding"][v]]
         if llm_cols:
             n = len(reviews)
-            row += [round(sum(r["faithfulness"][v] for r in reviews) / n, 2), round(sum(r["clarity"][v] for r in reviews) / n, 2)]
+            row += [round(sum(r["faithfulness"][v] for r in reviews) / n, 2), round(sum(r["clarity"][v] for r in reviews) / n, 2), t[v].get("llm_high_risk_warnings", 0)]
         rows.append(row)
     lines += [_table(header, rows), ""]
 
     lines += ["## Top reasons", ""]
     for i, v in enumerate(variants, 1):
         bits = [f"{t[v].get('high_risk_vetoes', 0)} high-risk veto(es)", f"{t[v].get('vetoes', 0)} veto(es) in total", f"{t[v].get('wins', 0)} query win(s)", f"mean tie-break score {agg['mean_score'][v]}"]
+        if llm_cols:
+            bits.insert(2, f"{t[v].get('llm_high_risk_warnings', 0)} high-risk LLM warning(s)")
         lines.append(f"{i}. `{v}`: " + ", ".join(bits) + ".")
-    lines += ["", "Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then mean score, then name.", ""]
+    lines += ["", "Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then mean score, then name. LLM warnings are ship blockers on the selected variant, never vetoes.", ""]
 
     lines += ["## Per-query reasoning", ""]
     for pq in agg["per_query"]:
@@ -64,7 +69,8 @@ def render_recommendation(agg: dict, reviews: list[dict], meta: dict) -> str:
             state = f"vetoed by {', '.join(c['vetoed_by'])}" if c["vetoed_by"] else ("clean" if c["tier"] == 0 else "failures: " + ", ".join(c["failures"]))
             if c["vetoed_by"] and len(c["failures"]) > len(c["vetoed_by"]):
                 state += "; also " + ", ".join(f for f in c["failures"] if f not in c["vetoed_by"])
-            lines.append(f"- `{c['variant']}`: {state}; score {c['score']}")
+            warn = "; LLM warning: " + ", ".join(c["llm_warnings"]) if c.get("llm_warnings") else ""
+            lines.append(f"- `{c['variant']}`: {state}; score {c['score']}{warn}")
         lines.append(f"- LLM winner: `{pq['llm_winner']}`. {by_review[pq['query_id']]['justification']}")
         lines.append("")
 

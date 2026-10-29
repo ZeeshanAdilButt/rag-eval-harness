@@ -11,8 +11,8 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 ## Phase 2: design
 
 - Wrote `docs/design.md`: architecture, normalisation, every scoring rule with its threshold and reason, the LLM contract, aggregation, validation and tradeoffs.
-- Mid-build the scope grew: each stage runs as a pluggable agent that claims its task, every run is stored in Postgres (SQLite when no `DATABASE_URL`), and configuration is layered like ampwise (defaults, TOML, profile, env, `--set`). Added sections for agents, storage and configuration.
-- Borrowed from the AI engineering course: a versioned prompt file, blind labels in shuffled order for the judge, "length is not a criterion" in the rubric, and per-attempt request logging with tokens, latency and finish reason.
+- Mid-build the scope grew: each stage runs as a pluggable agent that claims its task, every run is stored in Postgres (SQLite when no `DATABASE_URL`), and configuration is layered (defaults, TOML, profile, env, `--set`), following patterns from an earlier production LLM pipeline. Added sections for agents, storage and configuration.
+- Borrowed from standard LLM-judge practice: a versioned prompt file, blind labels in shuffled order for the judge, "length is not a criterion" in the rubric, and per-attempt request logging with tokens, latency and finish reason.
 - Gate: a blind critic reviewed the requirements, design and config without the code. Findings and fixes are under phase 7.
 
 ## Phase 3: deterministic stages
@@ -45,3 +45,12 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 - `run.py` and `validate.py` share one CLI with `--config`, `--profile`, `--set`, `--data-dir`, `--out-dir`, `--llm` and `--offline`.
 - CI runs on Python 3.11 and 3.12 with no key: `run.py`, `validate.py`, `pytest`, then `git diff --exit-code outputs/` to prove the committed artifacts are reproducible. A second job runs against a Postgres 17 service and checks that every table has rows.
 - Gate: `python run.py && python validate.py && pytest` pass locally (41 tests); a third variant with renamed query IDs runs and validates in a test.
+
+## Phase 7: blind review and fixes
+
+- A blind critic reviewed the design without the code and filed 12 defects (3 S1). Three agents fixed them in parallel on separate files:
+  - aggregation: risk-flag tier below incomplete answers, LLM ship blockers on high risk, overall-tie flag;
+  - rule checks: grounding against expected docs on a retrieval miss, scoped negation and conjunction clauses, token-boundary includes, zero-score hits, list indices, refusal clauses;
+  - LLM and validation: scaled token budget, de-blinded justifications, delimited and escaped answers, stale prompt-hash detection, Postgres fallback.
+- OpenAI is now the default provider (`gpt-4.1-2025-04-14`), with the key in a gitignored `config/local.toml` or `OPENAI_API_KEY`.
+- Gate: `python run.py && python validate.py && pytest` pass, outputs are byte-identical across runs, and a third variant with renamed IDs validates.

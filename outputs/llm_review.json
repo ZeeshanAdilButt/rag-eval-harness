@@ -18,13 +18,14 @@
         "answer_2": "prompt_a"
       }
     },
-    "model": "claude-haiku-5-5",
+    "max_tokens": 3600,
+    "model": "gpt-4.1-2025-04-14",
     "prompt_name": "comparative_review",
-    "prompt_sha256": "64b1b49b45524464b281ce34b60645ae17180cf43250f4f6b8f40d675cf5bea3",
-    "prompt_template_sha256": "3418f033e2d15bd4bf036c8e5c49ead3fbd6c6ea13ef084df55c59adbee3b167",
-    "prompt_version": "1",
-    "provider": "anthropic",
-    "reason": "ANTHROPIC_API_KEY not set",
+    "prompt_sha256": "09fa8409e72709ce4f0c87377a44016b52bea2b8b099154465995e6511f862f1",
+    "prompt_template_sha256": "3e01aa8de2be0dc4a8d62fe1ac520f7b61d6743734ee6a0c5e61302d4f6f687b",
+    "prompt_version": "2",
+    "provider": "openai_compatible",
+    "reason": "OPENAI_API_KEY not set",
     "source": "stub",
     "temperature": 0.0
   },
@@ -38,7 +39,7 @@
         "prompt_a": 5,
         "prompt_b": 3
       },
-      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": []
@@ -55,7 +56,7 @@
         "prompt_a": 5,
         "prompt_b": 1
       },
-      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": [
@@ -75,7 +76,7 @@
         "prompt_a": 5,
         "prompt_b": 4
       },
-      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": []
@@ -92,7 +93,7 @@
         "prompt_a": 4,
         "prompt_b": 1
       },
-      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": [

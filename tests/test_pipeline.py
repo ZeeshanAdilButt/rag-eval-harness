@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def _project(tmp_path: Path) -> Path:
     for sub in ("data", "config", "prompts"):
-        shutil.copytree(ROOT / sub, tmp_path / sub)
+        shutil.copytree(ROOT / sub, tmp_path / sub, ignore=shutil.ignore_patterns("local.toml"))
     return tmp_path
 
 

@@ -2,6 +2,8 @@
 
 An offline, replayable harness that compares prompt variants of a retrieval-augmented support assistant and recommends the safer one. It retrieves evidence with BM25, runs rule checks on every answer, makes exactly one LLM call for a comparative review (or uses a labelled stub with no key), aggregates deterministically with safety vetoes, writes reports, and stores every run in Postgres or SQLite.
 
+For a one-page diagram of the whole flow and the order to read the files, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Quick start
 
 Python 3.11 or newer.
@@ -15,13 +17,21 @@ pytest
 
 With no API key, `run.py` uses the stub review and says so in every artifact. The committed `outputs/` come from that path, because no key was available when they were built.
 
-Optional:
+Optional, a real review with OpenAI (default model `gpt-4.1-2025-04-14`, pinned):
 
 ```bash
-export ANTHROPIC_API_KEY=...          # one real review call; later runs replay it from the log
-docker compose up -d                  # Postgres 17 on 127.0.0.1:5446
-export DATABASE_URL=postgresql://rag:rag@127.0.0.1:5446/rag_eval
+export OPENAI_API_KEY=...   # or copy config/local.example.toml to config/local.toml and set api_key there
+python run.py               # one real call; later runs replay it from outputs/llm_calls.jsonl
+```
+
+`config/local.toml` is gitignored. Do not put a key in `config/eval.toml`, which is committed.
+
+Optional, store runs in Postgres:
+
+```bash
+docker compose up -d        # Postgres 17 on 127.0.0.1:5446
 pip install "psycopg[binary]==3.2.10"
+export DATABASE_URL=postgresql://rag:rag@127.0.0.1:5446/rag_eval
 python run.py
 ```
 
@@ -138,11 +148,11 @@ Phrase lists come from each query. Generic word lists come from config. Nothing 
 - **One call** for all query and answer pairs. Each query sends the question, the risk level, the retrieved evidence, the answers and their rule-check results. A second call happens only if the first reply fails validation.
 - **No deployment decision.** The prompt (`prompts/llm_review.toml`, versioned) tells the model to judge only against the evidence, not to retrieve, and not to recommend a variant. The decision is made in `aggregate.py`.
 - **Bias controls:** answers appear as `answer_1`, `answer_2`, ... in an order shuffled per query by hash, so variant names and positions carry no signal. The rubric says length is not a criterion. The code maps labels back to variants.
-- **Schema enforced twice.** It is built from the data (query IDs, labels, scores 1 to 5, at most 3 overclaims) and sent as a forced tool call to Anthropic, or as a strict `json_schema` to OpenAI-compatible APIs. The reply is checked again with pydantic plus semantic checks: every query exactly once, the variant set exact, the winner allowed.
+- **Schema enforced twice.** It is built from the data (query IDs, labels, scores 1 to 5, at most 3 overclaims) and sent as a strict `json_schema` to OpenAI-compatible APIs (length and count limits are dropped there, because some strict modes reject them), or as a forced tool call to Anthropic. The reply is checked again with pydantic plus semantic checks: every query exactly once, the variant set exact, the winner allowed.
 - **Failure handling.** An invalid reply gets one retry with the errors listed. A timeout, 429 or 5xx gets one transport retry, and other HTTP errors get none. A cut-off reply counts as invalid. After that, the run uses `stub_fallback` with the reason recorded. The run never crashes because of the model.
 - **Replay.** The request (system prompt, user prompt, schema, provider, model, temperature, max tokens) is hashed with SHA-256. A valid live reply with the same hash in `llm_calls.jsonl` is replayed without a call. `--offline` replays only.
 - **Stub.** Without a key, the review is derived from the rule checks: faithfulness from grounding, clarity a neutral 3. It is labelled in `llm_review.json` (`meta.source` and a `[STUB]` prefix), in `llm_calls.jsonl` (`mode`) and on the first lines of both reports. Its scores get zero weight, so the rule checks are not counted twice.
-- **Pinned.** `claude-haiku-5-5`, temperature 0, set in config. The key is read from the environment variable named in `llm.api_key_env`. It is never printed and never logged.
+- **Pinned.** `gpt-4.1-2025-04-14` (a dated snapshot), temperature 0, set in config. Reasoning models (`o*`, `gpt-5*`) reject a temperature, so it is left out for them. The key comes from `llm.api_key` in the gitignored `config/local.toml`, or from the environment variable named in `llm.api_key_env`. It is a pydantic `SecretStr`: never printed, never logged, masked in the stored run config.
 
 ## The decision
 
@@ -187,6 +197,7 @@ The LLM output is never regenerated. "Reproducible from the stored outputs" mean
 
 **A different LLM provider:**
 
+- Anthropic: `python run.py --profile anthropic` with `ANTHROPIC_API_KEY` set (forced tool use).
 - OpenRouter: `python run.py --profile openrouter` with `OPENROUTER_API_KEY` set.
 - Any OpenAI-compatible API (OpenAI, vLLM, Ollama): `--set llm.provider=openai_compatible --set llm.base_url=... --set llm.model=... --set llm.api_key_env=...`.
 - Anything else: write a class with `complete(system, user, schema, cfg, api_key) -> ProviderReply` that raises `ProviderError` with a code from the closed list, and add it to `PROVIDERS` in `llm.py`.

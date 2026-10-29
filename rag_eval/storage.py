@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -174,22 +175,35 @@ class SQLStore(Store):
         self.conn.close()
 
 
+def _open_sqlite(cfg: StorageConfig, root: Path) -> Store:
+    path = root / cfg.sqlite_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return SQLStore(sqlite3.connect(path), "sqlite")
+
+
+def _open_postgres(url: str) -> Store:
+    import psycopg  # optional dependency, only needed for Postgres
+
+    return SQLStore(psycopg.connect(url, connect_timeout=3), "postgres")
+
+
 def open_store(cfg: StorageConfig, root: Path) -> Store:
     url = os.environ.get(cfg.database_url_env, "").strip()
     backend = cfg.backend
-    if backend == "auto":
-        backend = "postgres" if url else "sqlite"
     if backend == "none":
         return Store()
-    if backend == "postgres":
-        if not url:
-            raise RuntimeError(f"storage.backend is postgres but {cfg.database_url_env} is not set")
-        import psycopg  # optional dependency, only needed for Postgres
-
-        store: Store = SQLStore(psycopg.connect(url), "postgres")
-    else:
-        path = root / cfg.sqlite_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        store = SQLStore(sqlite3.connect(path), "sqlite")
+    if backend == "postgres" and not url:
+        raise RuntimeError(f"storage.backend is postgres but {cfg.database_url_env} is not set")
+    store: Store | None = None
+    if backend == "postgres" or (backend == "auto" and url):
+        try:
+            store = _open_postgres(url)
+        except Exception as exc:  # never echo str(exc): a driver error can carry the URL
+            if backend == "postgres":
+                raise
+            why = "psycopg is not installed" if isinstance(exc, ImportError) else f"connection failed ({type(exc).__name__})"
+            print(f"warning: {cfg.database_url_env} is set but {why}; falling back to SQLite", file=sys.stderr)
+    if store is None:
+        store = _open_sqlite(cfg, root)
     store.migrate()
     return store

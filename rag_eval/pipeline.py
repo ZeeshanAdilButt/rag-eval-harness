@@ -45,7 +45,7 @@ def run_pipeline(cfg: Config, root: Path, log=print) -> dict:
     run_id = str(uuid.uuid4())
     worker = f"{socket.gethostname()}:{os.getpid()}"
     store.insert("runs", [{
-        "run_id": run_id, "status": "running", "started_at": now(), "config": cfg.model_dump(),
+        "run_id": run_id, "status": "running", "started_at": now(), "config": cfg.model_dump(mode="json"),
         "config_sha256": cfg.digest(), "inputs_sha256": inputs_digest(data_dir), "variants": inputs.variants,
     }])
     store.insert("kb_docs", [{"run_id": run_id, **d.model_dump()} for d in inputs.kb])

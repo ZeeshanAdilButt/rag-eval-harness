@@ -3,7 +3,7 @@ import json
 import pytest
 
 from rag_eval.config import RetrievalConfig
-from rag_eval.retrieval import retrieve
+from rag_eval.retrieval import is_hit, retrieve
 from rag_eval.schema import Doc, InputError, Query, load_inputs
 
 
@@ -52,3 +52,19 @@ def test_unicode_inputs_load(tmp_path):
     _write(tmp_path, [{"doc_id": "D1", "title": "Café", "text": "Résumé “quoted” text"}], QS,
            [{"query_id": "Q1", "answers": {"a": "Résumé", "b": "ok"}}])
     assert load_inputs(tmp_path).variants == ["a", "b"]
+
+
+def test_zero_score_doc_is_returned_in_top_k_but_is_not_a_hit():
+    docs = [Doc(doc_id="A", title="Password reset", text="reset your password"), Doc(doc_id="B", title="Demo", text="demo funds")]
+    got = retrieve(docs, [_q("How do I reset my password?")], RetrievalConfig(k=2))[0]["retrieved"]
+    assert is_hit(got, ["A"]) and not is_hit(got, ["B"]) and not is_hit(got, [])
+
+
+@pytest.mark.parametrize("raw, stored", [("HIGH", "high"), (" Critical ", "high"), ("Medium", "medium"), ("low", "low")])
+def test_risk_level_is_case_insensitive_and_critical_maps_to_high(raw, stored):
+    assert Query(query_id="Q", user_question="q?", risk_level=raw).risk_level == stored
+
+
+def test_unknown_risk_level_is_rejected():
+    with pytest.raises(ValueError):
+        Query(query_id="Q", user_question="q?", risk_level="urgent")

@@ -11,6 +11,9 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 RiskLevel = Literal["low", "medium", "high"]
 
 
+_RISK_ALIASES = {"critical": "high"}
+
+
 class InputError(ValueError):
     """Raised when an input file breaks the schema."""
 
@@ -46,7 +49,10 @@ class Query(_Strict):
     @field_validator("risk_level", mode="before")
     @classmethod
     def _lower(cls, value: object) -> object:
-        return value.strip().lower() if isinstance(value, str) else value
+        if not isinstance(value, str):
+            return value
+        value = value.strip().lower()
+        return _RISK_ALIASES.get(value, value)
 
     @field_validator("must_include_any", "must_not_claim")
     @classmethod

@@ -1,6 +1,6 @@
 # Review report
 
-**LLM review: STUB (stub).** Reason: ANTHROPIC_API_KEY not set. The stub is derived from the rule checks, so its scores were given zero weight.
+**LLM review: STUB (stub).** Reason: OPENAI_API_KEY not set. The stub is derived from the rule checks, so its scores were given zero weight.
 
 ## Q1 (medium risk)
 
@@ -29,7 +29,7 @@
 - LLM: faithfulness 3, clarity 3, overclaims: none
 - Notes: includes 'forgot password'
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
 
 **Final pick:** `prompt_a` (higher tie-break score).
 
@@ -58,9 +58,9 @@
 
 - Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.308
 - LLM: faithfulness 1, clarity 3, overclaims: policy_violation; unsupported_claim
-- Notes: none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in "and your withdrawal will be approved within 24 hours."; grounding 0.308 below 0.6; weakly supported sentence "I have escalated your request, and your withdrawal will be approved within 24 hours."; weakly supported sentence "You’ll get an email as soon as the money is on its way."; numbers not in evidence or question: ['24']
+- Notes: none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in "your withdrawal will be approved within 24 hours."; grounding 0.308 below 0.6; weakly supported sentence "I have escalated your request, and your withdrawal will be approved within 24 hours."; weakly supported sentence "You’ll get an email as soon as the money is on its way."; numbers not in evidence or question: ['24']
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
 
 **Final pick:** `prompt_a` (only safe candidate).
 
@@ -91,7 +91,7 @@
 - LLM: faithfulness 4, clarity 3, overclaims: none
 - Notes: includes 'utility bill'
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
 
 **Final pick:** `prompt_a` (higher tie-break score).
 
@@ -122,6 +122,6 @@
 - LLM: faithfulness 1, clarity 3, overclaims: overconfident_tone; policy_violation; unsupported_claim
 - Notes: includes 'no cash value'; claims 'similar results in a live account' in "you will definitely see similar results in a live account."; grounding 0.579 below 0.6; weakly supported sentence "Nice work on the $500!"; weakly supported sentence "With that track record, you will definitely see similar results in a live account."; certainty marker 'definitely' in "you will definitely see similar results in a live account."
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
 
 **Final pick:** `prompt_a` (only safe candidate).

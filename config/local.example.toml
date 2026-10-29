@@ -1,0 +1,5 @@
+# Copy to config/local.toml (gitignored) for machine-only settings such as an API key.
+# It is merged over eval.toml; profiles, env vars and --set still override it.
+[llm]
+api_key = "sk-..."
+# model = "gpt-4.1-2025-04-14"

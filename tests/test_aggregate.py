@@ -56,3 +56,49 @@ def test_retrieval_miss_is_not_charged_to_the_answer():
     agg = aggregate([{"query_id": "Q1", "risk_level": "high"}], ["a", "b"], scores,
                     [{**_review("Q1", "a", {"a": 3, "b": 3}), "faithfulness": {"a": 3, "b": 3}}], "stub", CFG)
     assert all(c["tier"] == 0 and not c["vetoed_by"] for c in agg["per_query"][0]["candidates"])
+
+
+def test_risk_flag_tier_beats_higher_score_on_medium_risk():
+    scores = [_row("Q1", "fluent", ["unsupported_claim"], grounding=0.95, include=True),
+              _row("Q1", "safe", ["missed_key_fact"], grounding=0.5, include=False)]
+    reviews = [_review("Q1", "fluent", {"safe": 2, "fluent": 5})]
+    agg = aggregate([{"query_id": "Q1", "risk_level": "medium"}], ["fluent", "safe"], scores, reviews, "live", CFG)
+    pq = agg["per_query"][0]
+    cands = {c["variant"]: c for c in pq["candidates"]}
+    assert not cands["fluent"]["vetoed_by"] and cands["fluent"]["tier"] == 2 and cands["safe"]["tier"] == 1
+    assert cands["fluent"]["score"] > cands["safe"]["score"]
+    assert pq["winner"] == "safe" and pq["reason"] == "lower failure tier"
+
+
+def _llm_case(source, faith, claims):
+    scores = [_row("Q1", "safe"), _row("Q1", "fluent", ["irrelevant_answer"])]
+    review = {**_review("Q1", "safe", {"safe": 3, "fluent": 3}), "faithfulness": {"safe": faith, "fluent": 5},
+              "overclaim_flags": {"safe": claims, "fluent": []}}
+    return aggregate([{"query_id": "Q1", "risk_level": "high"}], ["safe", "fluent"], scores, [review], source, CFG)
+
+
+def test_llm_low_faithfulness_blocks_high_risk_when_live_not_stub():
+    live = _llm_case("live", 2, [])
+    assert live["selected"] == "safe" and live["tally"]["safe"]["llm_high_risk_warnings"] == 1
+    assert not live["ready_to_ship"] and any("LLM" in b for b in live["ship_blockers"])
+    assert live["per_query"][0]["candidates"][1]["llm_warnings"] == [] and live["per_query"][0]["winner"] == "safe"
+    stub = _llm_case("stub", 2, ["promises approval"])
+    assert stub["ready_to_ship"] and stub["tally"]["safe"]["llm_high_risk_warnings"] == 0 and not stub["per_query"][0]["candidates"][0]["llm_warnings"]
+
+
+def test_llm_overclaim_blocks_high_risk_but_not_lower_risk():
+    assert not _llm_case("replay", 4, ["promises approval"])["ready_to_ship"]
+    scores = [_row("Q1", "safe"), _row("Q1", "fluent")]
+    review = {**_review("Q1", "safe", {"safe": 3, "fluent": 3}), "overclaim_flags": {"safe": ["x"], "fluent": []}}
+    agg = aggregate([{"query_id": "Q1", "risk_level": "medium"}], ["safe", "fluent"], scores, [review], "live", CFG)
+    assert agg["ready_to_ship"]
+
+
+def test_overall_tie_flag():
+    queries = [{"query_id": "Q1", "risk_level": "low"}]
+    scores = [_row("Q1", "a"), _row("Q1", "b")]
+    reviews = [{**_review("Q1", "tie", {"a": 3, "b": 3}), "faithfulness": {"a": 4, "b": 4}}]
+    tied = aggregate(queries, ["b", "a"], scores, reviews, "stub", CFG)
+    assert tied["overall_tie"] and tied["selected"] == "a"
+    scores = [_row("Q1", "a", ["missed_key_fact"]), _row("Q1", "b")]
+    assert not aggregate(queries, ["b", "a"], scores, reviews, "stub", CFG)["overall_tie"]

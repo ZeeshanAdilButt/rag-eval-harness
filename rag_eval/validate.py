@@ -8,7 +8,7 @@ from pathlib import Path
 from .aggregate import aggregate
 from .checks import run_checks
 from .config import Config
-from .llm import read_log, validate_reply
+from .llm import prepare, read_log, validate_reply
 from .report import render_recommendation, render_review_report
 from .retrieval import retrieve
 from .schema import InputError, load_inputs
@@ -92,6 +92,15 @@ def validate(cfg: Config, root: Path) -> list[str]:
         l.get("prompt_sha256") == meta.get("prompt_sha256") and l.get("mode") == "live" and l.get("valid") for l in log
     ):
         errors.append("llm_calls.jsonl: replayed review has no valid live entry")
+    try:  # stored retrieval or scores may be malformed; earlier checks already report that
+        prep = prepare(inputs, retrieval, scores, cfg.llm, root)
+    except (KeyError, TypeError, ValueError):
+        prep = None
+    if prep is not None:
+        if meta.get("prompt_sha256") != prep.digest:
+            errors.append("llm_review.json: prompt hash is stale; rerun python run.py")
+        if meta.get("labels") != prep.labels:
+            errors.append("llm_review.json: reviewed labels differ from the current label order; rerun python run.py")
     if errors:
         return errors
 

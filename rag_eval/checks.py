@@ -5,8 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .config import ChecksConfig
-from .schema import Query
-from .text import clauses, content_tokens, is_negated, normalize, numbers, sentences, tokens
+from .retrieval import is_hit
+from .schema import Doc, Query
+from .text import NEGATORS, clauses, content_tokens, is_negated, negated_near, normalize, numbers, sentences, tokens
 
 RISK_CODES = ("overconfident_tone", "policy_violation", "unsupported_claim")
 
@@ -32,24 +33,33 @@ def _covers(unit: str, phrase_tokens: list[str]) -> bool:
     return bool(phrase_tokens) and all(t in unit_tokens for t in phrase_tokens)
 
 
+def _units(answer: str) -> list[str]:
+    """Clauses first, then the whole sentence, for every sentence."""
+    return [u for sentence in sentences(answer) for u in [*clauses(sentence), sentence]]
+
+
 def phrase_present(answer: str, phrase: str) -> bool:
-    """Substring match after normalisation, or every content token in one sentence."""
-    if normalize(phrase).strip() in normalize(answer):
-        return True
+    """The phrase as a contiguous token run, or all its content tokens, in one unit.
+
+    A unit that negates the phrase's words does not count unless the phrase itself is negated.
+    """
     wanted = content_tokens(phrase)
-    return any(_covers(s, wanted) for s in sentences(answer))
+    phrase_negated = is_negated(phrase)
+    for unit in _units(answer):
+        if (_marker_hit(unit, phrase) or _covers(unit, wanted)) and negated_near(unit, wanted) == phrase_negated:
+            return True
+    return False
 
 
 def claim_made(answer: str, claim: str) -> str | None:
-    """Return the clause or sentence that makes the claim, honouring negation."""
+    """Return the clause or sentence that makes the claim, honouring negation near the claim's words."""
     wanted = content_tokens(claim)
     if not wanted:
         return None
     claim_negated = is_negated(claim)
-    for sentence in sentences(answer):
-        for unit in [*clauses(sentence), sentence]:
-            if _covers(unit, wanted) and is_negated(unit) == claim_negated:
-                return unit
+    for unit in _units(answer):
+        if _covers(unit, wanted) and negated_near(unit, wanted) == claim_negated:
+            return unit
     return None
 
 
@@ -60,14 +70,25 @@ def _marker_hit(unit: str, marker: str) -> bool:
     return n > 0 and any(unit_tokens[i : i + n] == marker_tokens for i in range(len(unit_tokens) - n + 1))
 
 
-def _is_refusal(sentence: str, cfg: ChecksConfig) -> bool:
-    norm = normalize(sentence)
+def _is_refusal(clause: str, cfg: ChecksConfig) -> bool:
+    norm = normalize(clause)
     return any(normalize(m) in norm for m in cfg.refusal_markers)
+
+
+def factual_units(answer: str, cfg: ChecksConfig) -> list[str]:
+    """Sentences with their refusal clauses dropped; a sentence that is all refusal vanishes."""
+    out = []
+    for sentence in sentences(answer):
+        parts = clauses(sentence)
+        kept = [c for c in parts if not _is_refusal(c, cfg)]
+        if kept:
+            out.append(sentence if len(kept) == len(parts) else ", ".join(kept))
+    return out
 
 
 def grounding(answer: str, ev: Evidence, cfg: ChecksConfig) -> tuple[float, list[str], list[str], bool]:
     """Return (score, unsupported sentences, unsupported numbers, all_refusal)."""
-    factual = [s for s in sentences(answer) if not _is_refusal(s, cfg)]
+    factual = factual_units(answer, cfg)
     if not factual:
         return 1.0, [], [], True
     answer_tokens = {t for s in factual for t in content_tokens(s)}
@@ -88,17 +109,34 @@ def grounding(answer: str, ev: Evidence, cfg: ChecksConfig) -> tuple[float, list
 
 
 def check_answer(
-    query: Query, variant: str, answer: str, retrieved: list[dict], cfg: ChecksConfig
+    query: Query,
+    variant: str,
+    answer: str,
+    retrieved: list[dict],
+    cfg: ChecksConfig,
+    kb: dict[str, Doc] | None = None,
 ) -> dict:
-    ev = Evidence.build(retrieved, query.user_question)
     notes: list[str] = []
     failures: set[str] = set()
 
     retrieved_ids = [r["doc_id"] for r in retrieved]
-    retrieval_hit = any(d in retrieved_ids for d in query.expected_doc_ids)
-    if not retrieval_hit:
+    retrieval_hit = is_hit(retrieved, query.expected_doc_ids) if query.expected_doc_ids else True
+    evidence_docs = retrieved
+    if not query.expected_doc_ids:
+        notes.append("no expected docs")
+    elif not retrieval_hit:
         failures.add("retrieval_miss")
-        notes.append(f"no expected doc {query.expected_doc_ids} in top {len(retrieved)} {retrieved_ids}")
+        notes.append(f"no expected doc {query.expected_doc_ids} with score > 0 in top {len(retrieved)} {retrieved_ids}")
+        # A retrieval miss must not make a correct answer look unsupported.
+        extra = [
+            {"doc_id": d.doc_id, "title": d.title, "text": d.text}
+            for i in query.expected_doc_ids
+            if kb and (d := kb.get(i)) and i not in retrieved_ids
+        ]
+        if extra:
+            evidence_docs = [*retrieved, *extra]
+            notes.append("graded against expected docs because retrieval missed")
+    ev = Evidence.build(evidence_docs, query.user_question)
 
     matched = [p for p in query.must_include_any if phrase_present(answer, p)]
     must_include_pass = not query.must_include_any or bool(matched)
@@ -127,14 +165,17 @@ def check_answer(
         failures.add("unsupported_claim")
         notes.append(f"numbers not in evidence or question: {bad_numbers}")
 
+    # A marker the evidence itself uses ("100 percent secure") is not an overclaim.
+    markers = [m for m in cfg.certainty_markers if not _marker_hit(ev.text, m)]
     for sentence in sentences(answer):
         for unit in clauses(sentence):
-            hits = [m for m in cfg.certainty_markers if _marker_hit(unit, m)]
-            if hits and not is_negated(unit):
-                failures.add("overconfident_tone")
-                notes.append(f"certainty marker '{hits[0]}' in \"{unit}\"")
+            for m in markers:
+                if _marker_hit(unit, m) and not negated_near(unit, [t for t in tokens(m, keep_stopwords=True) if t not in NEGATORS]):
+                    failures.add("overconfident_tone")
+                    notes.append(f"certainty marker '{m}' in \"{unit}\"")
+                    break
 
-    a_tokens = set(content_tokens(answer))
+    a_tokens = {t for s in sentences(answer) for t in content_tokens(s)}
     if a_tokens and not all_refusal:
         relevance = sum(1 for t in a_tokens if t in ev.token_set) / len(a_tokens)
         if relevance < cfg.relevance_min:
@@ -160,5 +201,7 @@ def run_checks(inputs, retrieval: list[dict], cfg: ChecksConfig) -> list[dict]:
     rows = []
     for q in inputs.queries:
         for variant in inputs.variants:
-            rows.append(check_answer(q, variant, inputs.answers[q.query_id][variant], by_query[q.query_id], cfg))
+            rows.append(
+                check_answer(q, variant, inputs.answers[q.query_id][variant], by_query[q.query_id], cfg, inputs.docs_by_id)
+            )
     return rows
