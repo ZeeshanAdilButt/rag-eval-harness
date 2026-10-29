@@ -184,13 +184,8 @@ def test_openai_body_pins_temperature_except_for_reasoning_models(monkeypatch):
 
 
 def test_local_toml_overlays_and_key_stays_secret(tmp_path):
-    (tmp_path / "eval.toml").write_text('[llm]
-model = "a"
-', encoding="utf-8")
-    (tmp_path / "local.toml").write_text('[llm]
-model = "b"
-api_key = "sk-secret"
-', encoding="utf-8")
+    (tmp_path / "eval.toml").write_text("[llm]" + chr(10) + 'model = "a"' + chr(10), encoding="utf-8")
+    (tmp_path / "local.toml").write_text("[llm]" + chr(10) + 'model = "b"' + chr(10) + 'api_key = "sk-secret"' + chr(10), encoding="utf-8")
     cfg = load_config(tmp_path / "eval.toml")
     assert cfg.llm.model == "b" and cfg.llm.api_key.get_secret_value() == "sk-secret"
     assert "sk-secret" not in json.dumps(cfg.model_dump(mode="json")) and "sk-secret" not in repr(cfg)
