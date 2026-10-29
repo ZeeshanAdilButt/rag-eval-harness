@@ -19,3 +19,9 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 
 - `text.py` (normalisation, stemming, clauses), `schema.py` (input models and clear errors), `config.py` (validated layers), `retrieval.py` (BM25 with doc_id tie-break) and `checks.py` (include, negation-aware banned claims, grounding with refusal handling and number checks, certainty markers, relevance).
 - Gate: tests for banned claims and negation, paraphrase limits, grounding, refusals, retrieval ties and every input error case.
+
+## Phase 4: LLM stage
+
+- `llm.py`: one request for every query, schema built from the data, forced tool use (Anthropic) or strict `json_schema` (OpenAI-compatible), pydantic plus semantic validation, one retry with the errors, then a labelled `stub_fallback`.
+- Replay cache keyed by the SHA-256 of the full request; `--offline` replays only. Transport retries only on timeouts, 429 and 5xx. Keys come from the environment and never reach the log.
+- Gate: tests with a fake provider for retry, fallback, no retry on auth errors, replay without a call, and the no-key stub.
