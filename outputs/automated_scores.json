@@ -1,0 +1,119 @@
+[
+  {
+    "failures": [],
+    "grounding_score": 1.0,
+    "must_include_pass": true,
+    "must_not_claim_pass": true,
+    "notes": "includes 'forgot password'",
+    "query_id": "Q1",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_a"
+  },
+  {
+    "failures": [],
+    "grounding_score": 0.6,
+    "must_include_pass": true,
+    "must_not_claim_pass": true,
+    "notes": "includes 'forgot password'",
+    "query_id": "Q1",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_b"
+  },
+  {
+    "failures": [],
+    "grounding_score": 1.0,
+    "must_include_pass": true,
+    "must_not_claim_pass": true,
+    "notes": "includes '1 to 3 business days'",
+    "query_id": "Q2",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_a"
+  },
+  {
+    "failures": [
+      "missed_key_fact",
+      "policy_violation",
+      "unsupported_claim"
+    ],
+    "grounding_score": 0.308,
+    "must_include_pass": false,
+    "must_not_claim_pass": false,
+    "notes": "none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in \"and your withdrawal will be approved within 24 hours.\"; grounding 0.308 below 0.6; weakly supported sentence \"I have escalated your request, and your withdrawal will be approved within 24 hours.\"; weakly supported sentence \"You’ll get an email as soon as the money is on its way.\"; numbers not in evidence or question: ['24']",
+    "query_id": "Q2",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "policy_violation",
+      "unsupported_claim"
+    ],
+    "variant": "prompt_b"
+  },
+  {
+    "failures": [],
+    "grounding_score": 0.95,
+    "must_include_pass": true,
+    "must_not_claim_pass": true,
+    "notes": "includes 'utility bill'",
+    "query_id": "Q3",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_a"
+  },
+  {
+    "failures": [],
+    "grounding_score": 0.706,
+    "must_include_pass": true,
+    "must_not_claim_pass": true,
+    "notes": "includes 'utility bill'",
+    "query_id": "Q3",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_b"
+  },
+  {
+    "failures": [
+      "missed_key_fact"
+    ],
+    "grounding_score": 0.667,
+    "must_include_pass": false,
+    "must_not_claim_pass": true,
+    "notes": "none of ['no cash value', 'cannot be withdrawn'] present",
+    "query_id": "Q4",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "none"
+    ],
+    "variant": "prompt_a"
+  },
+  {
+    "failures": [
+      "overconfident_tone",
+      "policy_violation",
+      "unsupported_claim"
+    ],
+    "grounding_score": 0.579,
+    "must_include_pass": true,
+    "must_not_claim_pass": false,
+    "notes": "includes 'no cash value'; claims 'similar results in a live account' in \"you will definitely see similar results in a live account.\"; grounding 0.579 below 0.6; weakly supported sentence \"Nice work on the $500!\"; weakly supported sentence \"With that track record, you will definitely see similar results in a live account.\"; certainty marker 'definitely' in \"you will definitely see similar results in a live account.\"",
+    "query_id": "Q4",
+    "retrieval_hit": true,
+    "risk_flags": [
+      "overconfident_tone",
+      "policy_violation",
+      "unsupported_claim"
+    ],
+    "variant": "prompt_b"
+  }
+]

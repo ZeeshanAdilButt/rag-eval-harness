@@ -38,3 +38,10 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 - `pipeline.py`: one claimed task per stage, a conditional `UPDATE` claim that can be taken over when stale, and a terminal state for every run.
 - `storage.py`: one schema rendered for Postgres and SQLite, 12 tables. `docker compose up -d` starts Postgres on port 5446.
 - Gate: a real run against Postgres 17 filled every table; tests cover claim exclusivity and stale takeover.
+
+## Phase 6: validation, CI and README
+
+- `validate.py` re-derives retrieval, rule checks and both reports from the stored files and compares; it also checks the review schema, the stub label and the log entry. Every problem is listed, not only the first.
+- `run.py` and `validate.py` share one CLI with `--config`, `--profile`, `--set`, `--data-dir`, `--out-dir`, `--llm` and `--offline`.
+- CI runs on Python 3.11 and 3.12 with no key: `run.py`, `validate.py`, `pytest`, then `git diff --exit-code outputs/` to prove the committed artifacts are reproducible. A second job runs against a Postgres 17 service and checks that every table has rows.
+- Gate: `python run.py && python validate.py && pytest` pass locally (41 tests); a third variant with renamed query IDs runs and validates in a test.

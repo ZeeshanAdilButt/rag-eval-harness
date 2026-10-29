@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "labels": {
+      "Q1": {
+        "answer_1": "prompt_a",
+        "answer_2": "prompt_b"
+      },
+      "Q2": {
+        "answer_1": "prompt_b",
+        "answer_2": "prompt_a"
+      },
+      "Q3": {
+        "answer_1": "prompt_a",
+        "answer_2": "prompt_b"
+      },
+      "Q4": {
+        "answer_1": "prompt_b",
+        "answer_2": "prompt_a"
+      }
+    },
+    "model": "claude-haiku-5-5",
+    "prompt_name": "comparative_review",
+    "prompt_sha256": "64b1b49b45524464b281ce34b60645ae17180cf43250f4f6b8f40d675cf5bea3",
+    "prompt_template_sha256": "3418f033e2d15bd4bf036c8e5c49ead3fbd6c6ea13ef084df55c59adbee3b167",
+    "prompt_version": "1",
+    "provider": "anthropic",
+    "reason": "ANTHROPIC_API_KEY not set",
+    "source": "stub",
+    "temperature": 0.0
+  },
+  "reviews": [
+    {
+      "clarity": {
+        "prompt_a": 3,
+        "prompt_b": 3
+      },
+      "faithfulness": {
+        "prompt_a": 5,
+        "prompt_b": 3
+      },
+      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "overclaim_flags": {
+        "prompt_a": [],
+        "prompt_b": []
+      },
+      "query_id": "Q1",
+      "winner": "prompt_a"
+    },
+    {
+      "clarity": {
+        "prompt_a": 3,
+        "prompt_b": 3
+      },
+      "faithfulness": {
+        "prompt_a": 5,
+        "prompt_b": 1
+      },
+      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "overclaim_flags": {
+        "prompt_a": [],
+        "prompt_b": [
+          "policy_violation",
+          "unsupported_claim"
+        ]
+      },
+      "query_id": "Q2",
+      "winner": "prompt_a"
+    },
+    {
+      "clarity": {
+        "prompt_a": 3,
+        "prompt_b": 3
+      },
+      "faithfulness": {
+        "prompt_a": 5,
+        "prompt_b": 4
+      },
+      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "overclaim_flags": {
+        "prompt_a": [],
+        "prompt_b": []
+      },
+      "query_id": "Q3",
+      "winner": "prompt_a"
+    },
+    {
+      "clarity": {
+        "prompt_a": 3,
+        "prompt_b": 3
+      },
+      "faithfulness": {
+        "prompt_a": 4,
+        "prompt_b": 1
+      },
+      "justification": "[STUB] Derived from rule checks (ANTHROPIC_API_KEY not set); not an independent review.",
+      "overclaim_flags": {
+        "prompt_a": [],
+        "prompt_b": [
+          "overconfident_tone",
+          "policy_violation",
+          "unsupported_claim"
+        ]
+      },
+      "query_id": "Q4",
+      "winner": "prompt_a"
+    }
+  ]
+}

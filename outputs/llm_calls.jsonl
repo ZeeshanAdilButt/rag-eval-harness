@@ -1,0 +1,1 @@
+{"attempt": 0, "error": "ANTHROPIC_API_KEY not set", "mode": "stub", "model": "claude-haiku-5-5", "prompt_sha256": "64b1b49b45524464b281ce34b60645ae17180cf43250f4f6b8f40d675cf5bea3", "provider": "anthropic", "request": null, "response": null, "temperature": 0.0, "valid": true}
