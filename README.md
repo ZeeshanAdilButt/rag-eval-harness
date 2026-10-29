@@ -14,7 +14,7 @@ For a one-page diagram of the whole flow and the order to read the files, see [A
 6. **Report.** `outputs/recommendation.md` gives the selected variant and why. `outputs/review_report.md` walks through every query.
 7. **Store and validate.** Every step runs as an agent that claims its task and writes its rows to Postgres or SQLite. `python validate.py` rebuilds everything deterministic and checks that it matches.
 
-The diagram and the file reading order are in [ARCHITECTURE.md](ARCHITECTURE.md).
+The diagram and the file reading order are in [ARCHITECTURE.md](ARCHITECTURE.md). A plain-language walkthrough of one run is in [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 ## Quick start
 
