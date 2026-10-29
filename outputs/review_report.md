@@ -1,6 +1,8 @@
 # Review report
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 bc8c467c3b4f).
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 53c7c63aa824).
+
+How to read this: `retrieval_hit` means an expected doc was in the top 2, `must_include` means a key fact was present, `must_not_claim` means no banned claim was made. Risk flags come from `outputs/failure_taxonomy.json`.
 
 ## Q1 (medium risk)
 
@@ -12,6 +14,9 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 |---|---|---|---|---|
 | 1 | D2 | Withdrawal review | 4.8357 | yes |
 | 2 | D1 | Password reset | 1.1622 |  |
+
+> [D2] Withdrawals may be placed into manual review for security checks. Most reviews complete within 24 hours, but some may take longer if additional verification is required.
+> [D1] Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.
 
 ### `prompt_a`
 
@@ -29,7 +34,7 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 - LLM: faithfulness 1, clarity 3, overclaim: yes
 - Notes: includes '24 hours'; claims 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"; claims 'instant' in "is usually instant after review."; certainty marker 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"
 
-**LLM winner:** `prompt_a`. `prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence.
+**LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence."
 
 **Final pick:** `prompt_a` (only safe candidate).
 
@@ -43,6 +48,9 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 |---|---|---|---|---|
 | 1 | D1 | Password reset | 4.6743 | yes |
 | 2 | D4 | Demo accounts | 0.6529 |  |
+
+> [D1] Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.
+> [D4] Demo accounts use virtual funds and do not support real deposits or withdrawals.
 
 ### `prompt_a`
 
@@ -60,7 +68,7 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 - LLM: faithfulness 1, clarity 2, overclaim: yes
 - Notes: none of ['cannot manually view', 'reset'] present; claims 'send you your password' in "send you your current password after confirming your account."
 
-**LLM winner:** `prompt_a`. `prompt_a` correctly states that support cannot view existing passwords and directs the user to the password reset process, as supported by D1. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password.
+**LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` is fully supported by D1, which states that support agents cannot manually view existing passwords and directs users to the password reset process. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password."
 
 **Final pick:** `prompt_a` (only safe candidate).
 
@@ -74,6 +82,9 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 |---|---|---|---|---|
 | 1 | D3 | Address verification | 6.2171 | yes |
 | 2 | D1 | Password reset | 0.0 |  |
+
+> [D3] Accepted proof of address documents include utility bills and bank statements dated within the last 6 months. Screenshots are not accepted.
+> [D1] Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.
 
 ### `prompt_a`
 
@@ -91,7 +102,7 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 - LLM: faithfulness 1, clarity 2, overclaim: yes
 - Notes: none of ['Screenshots are not accepted', 'bank statements'] present; claims 'screenshot is fine' in "A screenshot should be fine as long as your name"; grounding 0.286 below 0.6; weakly supported sentence "A screenshot should be fine as long as your name and address are visible."
 
-**LLM winner:** `prompt_a`. `prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.
+**LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` is fully faithful to D3, which explicitly states that screenshots are not accepted and specifies acceptable documents. `prompt_b` is incorrect and unsupported, as it claims screenshots are acceptable if details are visible, which contradicts the evidence."
 
 **Final pick:** `prompt_a` (only safe candidate).
 
@@ -105,6 +116,9 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 |---|---|---|---|---|
 | 1 | D4 | Demo accounts | 3.6911 | yes |
 | 2 | D1 | Password reset | 1.7406 |  |
+
+> [D4] Demo accounts use virtual funds and do not support real deposits or withdrawals.
+> [D1] Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.
 
 ### `prompt_a`
 
@@ -122,6 +136,6 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 - LLM: faithfulness 1, clarity 2, overclaim: yes
 - Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in "verified."; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
 
-**LLM winner:** `prompt_a`. `prompt_a` is directly supported by D4, which states demo accounts do not support real withdrawals. `prompt_b` is unsupported and misleading, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
+**LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` is directly supported by D4, which states demo accounts do not support real deposits or withdrawals. `prompt_b` invents the possibility of withdrawal after upgrading and verification, which is not mentioned in the evidence."
 
 **Final pick:** `prompt_a` (only safe candidate).

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 @pytest.fixture()
 def setup():
-    cfg = load_config(ROOT / "config" / "eval.toml", overrides=["llm.api_key=null"])
+    cfg = load_config(ROOT / "config" / "eval.toml", overrides=["llm.api_key=null", "llm.validation_retries=1"])
     inputs = load_inputs(ROOT / "data")
     retrieval = retrieve(inputs.kb, inputs.queries, cfg.retrieval)
     scores = run_checks(inputs, retrieval, cfg.checks)
@@ -153,7 +153,8 @@ def test_retrieval_miss_includes_expected_docs_and_answers_are_delimited(setup):
     expected = q.expected_doc_ids[0]
     miss = [{**r, "retrieved": [d for d in r["retrieved"] if d["doc_id"] not in q.expected_doc_ids]} if r["query_id"] == q.query_id else r
             for r in retrieval]
-    user, _ = build_prompt(inputs, miss, scores, tmpl, True)
+    user, _ = build_prompt(inputs, miss, scores, tmpl, True, include_expected=True)
+    assert "expected doc, not retrieved" not in build_prompt(inputs, miss, scores, tmpl, True)[0]
     assert f"[{expected}]" in user and "(expected doc, not retrieved)" in user
     hit_user, _ = build_prompt(inputs, retrieval, scores, tmpl, True)
     assert "not retrieved" not in hit_user.split("### Query")[1]  # first query hit, so no marker

@@ -20,7 +20,7 @@ class Evidence:
 
     @classmethod
     def build(cls, retrieved: list[dict], question: str) -> "Evidence":
-        joined = " ".join(f"{r['title']}. {r['text']}" for r in retrieved)
+        joined = " ".join(f"{r['title']}. {r['text']}" for r in retrieved if r.get("score", 1.0) > 0)
         return cls(
             text=joined,
             token_set=frozenset(tokens(joined) + tokens(question)),

@@ -33,7 +33,7 @@ flowchart TD
 
     A3 --> CACHE{"same prompt hash<br/>in llm_calls.jsonl?"}
     CACHE -->|yes| REPLAY[replay, no API call]
-    CACHE -->|no, key set| LIVE["ONE live call<br/>schema enforced + validated<br/>one retry if invalid"]
+    CACHE -->|no, key set| LIVE["ONE live call<br/>schema enforced + validated<br/>stub if invalid"]
     CACHE -->|no key| STUB["labelled stub<br/>zero weight"]
 
     A1 --> R1[outputs/retrieval.json]

@@ -83,7 +83,7 @@ def test_llm_low_faithfulness_blocks_high_risk_when_live_not_stub():
     assert not live["ready_to_ship"] and any("LLM" in b for b in live["ship_blockers"])
     assert live["per_query"][0]["candidates"][1]["llm_warnings"] == [] and live["per_query"][0]["winner"] == "safe"
     stub = _llm_case("stub", 2, ["promises approval"])
-    assert stub["ready_to_ship"] and stub["tally"]["safe"]["llm_high_risk_warnings"] == 0 and not stub["per_query"][0]["candidates"][0]["llm_warnings"]
+    assert not stub["ready_to_ship"] and stub["ship_blockers"] == ["LLM review did not run (stub)"] and stub["tally"]["safe"]["llm_high_risk_warnings"] == 0 and not stub["per_query"][0]["candidates"][0]["llm_warnings"]
 
 
 def test_llm_overclaim_blocks_high_risk_but_not_lower_risk():

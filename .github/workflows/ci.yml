@@ -21,7 +21,7 @@ jobs:
       - run: python validate.py
       - run: pytest
       - name: Committed artifacts match a fresh run
-        run: git diff --exit-code -- outputs/
+        run: git diff --exit-code -- outputs/ && test -z "$(git status --porcelain outputs/)"
 
   postgres:
     runs-on: ubuntu-latest

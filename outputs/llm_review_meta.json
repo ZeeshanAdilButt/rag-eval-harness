@@ -20,7 +20,7 @@
   "max_tokens": 3600,
   "model": "gpt-4.1-2025-04-14",
   "prompt_name": "comparative_review",
-  "prompt_sha256": "bc8c467c3b4f3c9916cdb215ac8d8e71a9597bf63bc33cc4a6fdcb81fc636490",
+  "prompt_sha256": "53c7c63aa8247f83b77a024ee6313b7a866340967a97e02bd00036b036548884",
   "prompt_template_sha256": "f0ef28cf69b1c19620c998b17eb5a86530cc4c02e46ea99649dd639494ada2ce",
   "prompt_version": "3",
   "provider": "openai_compatible",

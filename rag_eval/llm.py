@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Protocol
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, StrictBool, StrictInt, ValidationError
 
 from .config import LLMConfig
 
@@ -78,7 +78,7 @@ def _esc(text: str) -> str:
     return text.replace("<", "&lt;").replace(">", "&gt;")
 
 
-def build_prompt(inputs, retrieval: list[dict], scores: list[dict], tmpl: PromptTemplate, blind: bool) -> tuple[str, dict[str, dict[str, str]]]:
+def build_prompt(inputs, retrieval: list[dict], scores: list[dict], tmpl: PromptTemplate, blind: bool, include_expected: bool = False) -> tuple[str, dict[str, dict[str, str]]]:
     by_query = {r["query_id"]: r["retrieved"] for r in retrieval}
     by_pair = {(s["query_id"], s["variant"]): s for s in scores}
     docs = inputs.docs_by_id
@@ -86,10 +86,10 @@ def build_prompt(inputs, retrieval: list[dict], scores: list[dict], tmpl: Prompt
     for q in inputs.queries:
         mapping = label_order(q.query_id, inputs.variants, blind)
         labels[q.query_id] = mapping
-        retrieved = by_query[q.query_id]
+        retrieved = [d for d in by_query[q.query_id] if d["score"] > 0]
         lines = [f"- [{d['doc_id']}] {_esc(d['title'])}: {_esc(d['text'])}" for d in retrieved]
         got = {d["doc_id"] for d in retrieved}
-        if q.expected_doc_ids and not got & set(q.expected_doc_ids):
+        if include_expected and q.expected_doc_ids and not got & set(q.expected_doc_ids):
             lines += [f"- [{i}] {_esc(docs[i].title)}: {_esc(docs[i].text)} (expected doc, not retrieved)"
                       for i in q.expected_doc_ids if i in docs]
         evidence = "<evidence>\n" + "\n".join(lines) + "\n</evidence>"
@@ -103,7 +103,7 @@ def build_prompt(inputs, retrieval: list[dict], scores: list[dict], tmpl: Prompt
         )
         blocks.append(
             tmpl.query_block.format(
-                query_id=q.query_id, risk_level=q.risk_level, question=q.user_question,
+                query_id=_esc(q.query_id), risk_level=q.risk_level, question=_esc(q.user_question),
                 evidence=evidence, answers=answers, checks=checks,
             )
         )
@@ -145,9 +145,9 @@ def response_schema(query_ids: list[str], label_sets: list[list[str]]) -> dict:
 class Review(BaseModel):
     query_id: str
     winner: str
-    faithfulness: dict[str, int]
-    clarity: dict[str, int]
-    overclaim_flags: dict[str, bool]
+    faithfulness: dict[str, StrictInt]
+    clarity: dict[str, StrictInt]
+    overclaim_flags: dict[str, StrictBool]
     justification: str = Field(max_length=600)
 
 
@@ -250,14 +250,16 @@ def _post(url: str, headers: dict, body: dict, timeout: float) -> dict:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode())
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode(errors="replace")[:300]
         code: ErrorCode = (
             "RATE_LIMITED" if exc.code == 429 else "AUTH" if exc.code in (401, 403)
             else "SERVER" if exc.code >= 500 else "BAD_REQUEST"
         )
-        raise ProviderError(code, f"HTTP {exc.code}: {detail}") from None
-    except (TimeoutError, urllib.error.URLError) as exc:
-        raise ProviderError("TIMEOUT", str(exc)) from None
+        # The body is not kept: auth error bodies can echo part of the key.
+        raise ProviderError(code, f"HTTP {exc.code}") from None
+    except (TimeoutError, urllib.error.URLError, OSError) as exc:
+        raise ProviderError("TIMEOUT", type(exc).__name__) from None
+    except ValueError as exc:
+        raise ProviderError("INVALID", f"response is not JSON: {type(exc).__name__}") from None
 
 
 class AnthropicProvider:
@@ -344,7 +346,7 @@ class Prepared:
 def prepare(inputs, retrieval: list[dict], scores: list[dict], cfg: LLMConfig, root: Path) -> Prepared:
     """Everything that defines the request, shared by the run and by validation."""
     tmpl = PromptTemplate.load(root / cfg.prompt_file)
-    user, labels = build_prompt(inputs, retrieval, scores, tmpl, cfg.blind_labels)
+    user, labels = build_prompt(inputs, retrieval, scores, tmpl, cfg.blind_labels, cfg.include_expected_on_miss)
     schema = response_schema([q.query_id for q in inputs.queries], [list(m) for m in labels.values()])
     ecfg = effective_cfg(cfg, inputs)
     return Prepared(tmpl, user, labels, schema, ecfg, request_hash(tmpl.system, user, schema, ecfg))
@@ -361,7 +363,14 @@ def request_hash(system: str, user: str, schema: dict, cfg: LLMConfig) -> str:
 def read_log(path: Path) -> list[dict]:
     if not path.exists():
         return []
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    out = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            try:
+                out.append(json.loads(line))
+            except ValueError:
+                continue  # a corrupt line is not a cache hit
+    return out
 
 
 @dataclass
@@ -393,7 +402,10 @@ def run_review(inputs, retrieval, scores, cfg: LLMConfig, root: Path, log_path: 
     if cfg.mode in ("auto", "replay"):
         for entry in reversed(log):
             if entry.get("prompt_sha256") == digest and entry.get("mode") == "live" and entry.get("valid"):
-                reviews, errors = validate_reply(json.loads(entry["response"]), labels)
+                try:
+                    reviews, errors = validate_reply(json.loads(entry["response"]), labels)
+                except (TypeError, ValueError):
+                    continue
                 if not errors:
                     return ReviewResult(unblind(reviews, labels), {**meta, "source": "replay", "reason": "cached reply with the same prompt hash"})
         if cfg.mode == "replay":
@@ -421,7 +433,7 @@ def run_review(inputs, retrieval, scores, cfg: LLMConfig, root: Path, log_path: 
                 reply = provider.complete(tmpl.system, prompt_user, schema, cfg, api_key)
                 break
             except ProviderError as exc:
-                last_error = str(exc)
+                last_error = str(exc).replace(api_key, "[redacted]")
                 lines.append({**base_line, "mode": "live", "attempt": attempt, "valid": False, "error": last_error,
                               "error_code": exc.code, "latency_ms": int((time.monotonic() - started) * 1000),
                               "request": prompt_user, "response": None})

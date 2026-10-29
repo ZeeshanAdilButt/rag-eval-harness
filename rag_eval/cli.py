@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .config import ConfigError, load_config
+from .llm import ProviderError
 from .schema import InputError
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,9 +44,12 @@ def run_main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         result = run_pipeline(_config(args), args.root.resolve())
-    except (ConfigError, InputError, ValueError) as exc:
+    except (ConfigError, InputError, ValueError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+    except ProviderError as exc:
+        print(f"error: LLM provider: {exc}", file=sys.stderr)
+        return 3
     print(f"run {result['run_id']} stored in {result['storage']}: selected {result['selected']}, ready_to_ship={result['ready_to_ship']}")
     return 0
 

@@ -59,7 +59,7 @@ class LLMConfig(_Section):
     max_tokens_per_pair: int = Field(350, ge=50)
     timeout_s: float = Field(60, gt=0)
     transport_retries: int = Field(0, ge=0, le=3)
-    validation_retries: int = Field(1, ge=0, le=1)
+    validation_retries: int = Field(0, ge=0, le=1)
     api_key_env: str = "OPENAI_API_KEY"
     # Prefer the environment variable. A key here must live in config/local.toml (gitignored);
     # it is stored as a secret and never printed, logged or saved with the run.
@@ -67,6 +67,7 @@ class LLMConfig(_Section):
     base_url: str = "https://api.openai.com/v1/chat/completions"
     prompt_file: str = "prompts/llm_review.toml"
     blind_labels: bool = True
+    include_expected_on_miss: bool = False  # off: the judge sees only what was retrieved
 
 
 class AggregateConfig(_Section):

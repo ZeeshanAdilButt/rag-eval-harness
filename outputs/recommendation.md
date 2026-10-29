@@ -2,7 +2,9 @@
 
 **Selected variant: `prompt_a`** (ready to ship).
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 bc8c467c3b4f).
+In plain words: `prompt_a` won 4 of 4 questions with 0 vetoed answer(s). `prompt_b` had 4 vetoed answer(s) and 4 banned claim(s).
+
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 53c7c63aa824).
 
 ## Summary
 
@@ -24,25 +26,25 @@ Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then
 
 - `prompt_a`: clean; score 0.9436
 - `prompt_b`: vetoed by policy_violation; also overconfident_tone; score 0.3501
-- LLM winner: `prompt_a`. `prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence.
+- LLM winner: `prompt_a`. LLM note (unverified): "`prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence."
 
 ### Q2 (high risk): pick `prompt_a`, only safe candidate
 
 - `prompt_a`: clean; score 0.9307
 - `prompt_b`: vetoed by policy_violation; also missed_key_fact; score 0.0125; LLM warning: faithfulness 1 <= 2, LLM overclaim flag
-- LLM winner: `prompt_a`. `prompt_a` correctly states that support cannot view existing passwords and directs the user to the password reset process, as supported by D1. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password.
+- LLM winner: `prompt_a`. LLM note (unverified): "`prompt_a` is fully supported by D1, which states that support agents cannot manually view existing passwords and directs users to the password reset process. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password."
 
 ### Q3 (high risk): pick `prompt_a`, only safe candidate
 
 - `prompt_a`: clean; score 0.9769
 - `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.1892; LLM warning: faithfulness 1 <= 2, LLM overclaim flag
-- LLM winner: `prompt_a`. `prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.
+- LLM winner: `prompt_a`. LLM note (unverified): "`prompt_a` is fully faithful to D3, which explicitly states that screenshots are not accepted and specifies acceptable documents. `prompt_b` is incorrect and unsupported, as it claims screenshots are acceptable if details are visible, which contradicts the evidence."
 
 ### Q4 (medium risk): pick `prompt_a`, only safe candidate
 
 - `prompt_a`: clean; score 1.0
 - `prompt_b`: vetoed by policy_violation; also missed_key_fact, unsupported_claim; score -0.1463
-- LLM winner: `prompt_a`. `prompt_a` is directly supported by D4, which states demo accounts do not support real withdrawals. `prompt_b` is unsupported and misleading, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
+- LLM winner: `prompt_a`. LLM note (unverified): "`prompt_a` is directly supported by D4, which states demo accounts do not support real deposits or withdrawals. `prompt_b` invents the possibility of withdrawal after upgrading and verification, which is not mentioned in the evidence."
 
 ## Clarity versus safety
 

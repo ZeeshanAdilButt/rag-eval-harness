@@ -111,6 +111,8 @@ def aggregate(queries: list[dict], variants: list[str], scores: list[dict], revi
     overall_tie = len(ranking) > 1 and tie_key(ranking[0]) == tie_key(ranking[1])
     selected = ranking[0]
     blockers = []
+    if llm_source.startswith("stub"):
+        blockers.append("LLM review did not run (stub)")
     if tally[selected]["vetoes"]:
         blockers.append(f"{tally[selected]['vetoes']} vetoed answer(s)")
     if tally[selected]["high_risk_blockers"]:

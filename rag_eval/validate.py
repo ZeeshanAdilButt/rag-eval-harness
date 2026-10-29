@@ -18,6 +18,13 @@ ARTIFACTS = ("retrieval.json", "automated_scores.json", "failure_taxonomy.json",
 
 
 def validate(cfg: Config, root: Path) -> list[str]:
+    try:
+        return _validate(cfg, root)
+    except Exception as exc:  # a malformed artifact is a finding, not a crash
+        return [f"validation could not finish: {type(exc).__name__}: {exc}"]
+
+
+def _validate(cfg: Config, root: Path) -> list[str]:
     out = root / cfg.paths.out_dir
     errors: list[str] = []
 
@@ -99,6 +106,12 @@ def validate(cfg: Config, root: Path) -> list[str]:
         errors.append(f"llm_review.json: meta.source '{meta.get('source')}' is not live, replay, stub or stub_fallback")
     if meta.get("source", "").startswith("stub") and any(not r.get("justification", "").startswith("[STUB]") for r in reviews):
         errors.append("llm_review.json: stub reviews must be labelled [STUB]")
+    live = [l for l in log if l.get("prompt_sha256") == meta.get("prompt_sha256") and l.get("mode") == "live"]
+    if len(live) > 1 + cfg.llm.validation_retries:
+        errors.append(f"llm_calls.jsonl: {len(live)} live attempts for the current prompt; at most {1 + cfg.llm.validation_retries} allowed")
+    stale = sorted({l.get("prompt_sha256", "")[:12] for l in log} - {meta.get("prompt_sha256", "")[:12]})
+    if stale:
+        errors.append(f"llm_calls.jsonl: entries for other prompts {stale}; the log should hold only this review's calls")
     if not any(l.get("prompt_sha256") == meta.get("prompt_sha256") for l in log):
         errors.append("llm_calls.jsonl: no entry for the prompt hash in llm_review.json")
     if meta.get("source") == "replay" and not any(

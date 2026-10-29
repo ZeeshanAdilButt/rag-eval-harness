@@ -38,11 +38,12 @@ max_tokens_base = 800
 max_tokens_per_pair = 350
 timeout_s = 60
 transport_retries = 0         # 0 keeps it to one call; raise to retry timeouts, 429 and 5xx
-validation_retries = 1        # one retry with the validation errors, then a labelled stub
+validation_retries = 0        # 0 keeps it to exactly one call; 1 allows one corrective retry before the stub
 api_key_env = "OPENAI_API_KEY"  # or put api_key = "..." in config/local.toml (gitignored), never here
 base_url = "https://api.openai.com/v1/chat/completions"
 prompt_file = "prompts/llm_review.toml"
 blind_labels = true           # show answers as "answer_1", "answer_2" in a per-query shuffled order
+include_expected_on_miss = false  # true also shows the expected doc to the judge when retrieval missed it
 
 [aggregate]
 ignore_llm_weights_for_stub = true   # a stub is derived from the rule checks; do not count them twice

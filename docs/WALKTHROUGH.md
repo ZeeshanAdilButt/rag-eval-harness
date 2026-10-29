@@ -61,7 +61,7 @@ Agent: `llm_reviewer` [rag_eval/llm.py, prompts/llm_review.toml]
 
 All questions go into **one** request. Each one carries the question, its evidence, every answer and the rule-check results. The answers are shown as "answer_1" and "answer_2" in a shuffled order, so the model can't favour a name or a position. The model scores **faithfulness** and **clarity** from 1 to 5, quotes any overclaims, and names a winner per question. It is told never to decide what ships.
 
-The reply has to fit a strict schema, and the code checks it again. If it doesn't fit, the model gets one retry with the errors listed. If it still fails, or there is no API key, a clearly labelled **stub** stands in, and it gets zero weight in the decision.
+The reply has to fit a strict schema, and the code checks it again. If it doesn't fit (a retry with the errors listed can be switched on in config), or there is no API key, a clearly labelled **stub** stands in, and it gets zero weight in the decision.
 
 Every attempt is logged [outputs/llm_calls.jsonl]. On the next run with the same inputs, the stored reply is **replayed** and no API call is made.
 

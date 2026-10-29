@@ -66,7 +66,7 @@ def run_pipeline(cfg: Config, root: Path, log=print) -> dict:
             summary = REGISTRY[stage.agent]().run(ctx)
             store.update("agent_tasks", {"task_id": task_id}, {"status": "done", "finished_at": now(), "summary": summary})
             log(f"[{stage.stage}] {stage.agent}: {summary}")
-    except Exception as exc:
+    except BaseException as exc:
         store.update("agent_tasks", {"run_id": run_id, "status": "running"}, {"status": "failed", "finished_at": now(), "error": str(exc)[:2000]})
         store.update("runs", {"run_id": run_id}, {"status": "failed", "finished_at": now(), "error": str(exc)[:2000]})
         store.close()

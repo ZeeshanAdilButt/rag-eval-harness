@@ -35,6 +35,10 @@ def render_recommendation(agg: dict, reviews: list[dict], meta: dict) -> str:
     lines = ["# Recommendation", ""]
     status = "ready to ship" if agg["ready_to_ship"] else "selected as the safer option, not ready to ship: " + "; ".join(agg["ship_blockers"])
     lines += [f"**Selected variant: `{sel}`** ({status}).", ""]
+    others = [v for v in variants if v != sel]
+    lines += [f"In plain words: `{sel}` won {t[sel].get('wins', 0)} of {len(agg['per_query'])} questions with "
+              f"{t[sel].get('vetoes', 0)} vetoed answer(s). "
+              + " ".join(f"`{v}` had {t[v].get('vetoes', 0)} vetoed answer(s) and {t[v].get('policy_violation', 0)} banned claim(s)." for v in others), ""]
     if agg.get("overall_tie"):
         lines += [f"**The selection is a tie broken by name.** `{variants[0]}` and `{variants[1]}` are equal on every ranking key, so the harness has no real preference between them.", ""]
     lines += [_source_line(meta), ""]
@@ -71,7 +75,7 @@ def render_recommendation(agg: dict, reviews: list[dict], meta: dict) -> str:
                 state += "; also " + ", ".join(f for f in c["failures"] if f not in c["vetoed_by"])
             warn = "; LLM warning: " + ", ".join(c["llm_warnings"]) if c.get("llm_warnings") else ""
             lines.append(f"- `{c['variant']}`: {state}; score {c['score']}{warn}")
-        lines.append(f"- LLM winner: `{pq['llm_winner']}`. {by_review[pq['query_id']]['justification']}")
+        lines.append(f"- LLM winner: `{pq['llm_winner']}`. LLM note (unverified): \"{by_review[pq['query_id']]['justification']}\"")
         lines.append("")
 
     lines += ["## Clarity versus safety", ""]
@@ -95,7 +99,9 @@ def render_review_report(queries: list[dict], answers: dict, retrieval: list[dic
     by_pair = {(s["query_id"], s["variant"]): s for s in scores}
     by_review = {r["query_id"]: r for r in reviews}
     by_agg = {p["query_id"]: p for p in agg["per_query"]}
-    lines = ["# Review report", "", _source_line(meta), ""]
+    lines = ["# Review report", "", _source_line(meta), "",
+             "How to read this: `retrieval_hit` means an expected doc was in the top 2, `must_include` means a key fact was present, "
+             "`must_not_claim` means no banned claim was made. Risk flags come from `outputs/failure_taxonomy.json`.", ""]
     for q in queries:
         qid = q["query_id"]
         pq, rv = by_agg[qid], by_review[qid]
@@ -103,6 +109,7 @@ def render_review_report(queries: list[dict], answers: dict, retrieval: list[dic
         lines += ["**Retrieved:**", "", _table(["rank", "doc_id", "title", "score", "expected"], [
             [i + 1, d["doc_id"], d["title"], d["score"], "yes" if d["doc_id"] in q["expected_doc_ids"] else ""] for i, d in enumerate(by_ret[qid])
         ]), ""]
+        lines += [f"> [{d['doc_id']}] {d['text']}" for d in by_ret[qid]] + [""]
         for c in pq["candidates"]:
             v = c["variant"]
             s = by_pair[(qid, v)]
@@ -112,5 +119,5 @@ def render_review_report(queries: list[dict], answers: dict, retrieval: list[dic
             lines.append(f"- LLM: faithfulness {rv['faithfulness'][v]}, clarity {rv['clarity'][v]}, overclaim: {'yes' if rv['overclaim_flags'][v] else 'no'}")
             lines.append(f"- Notes: {s['notes']}")
             lines.append("")
-        lines += [f"**LLM winner:** `{rv['winner']}`. {rv['justification']}", "", f"**Final pick:** `{pq['winner']}` ({pq['reason']}).", ""]
+        lines += [f"**LLM winner:** `{rv['winner']}`. LLM note (unverified): \"{rv['justification']}\"", "", f"**Final pick:** `{pq['winner']}` ({pq['reason']}).", ""]
     return "\n".join(lines)
