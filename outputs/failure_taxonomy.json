@@ -49,6 +49,7 @@
       "query_id": "Q4",
       "tags": [
         "missed_key_fact",
+        "policy_violation",
         "unsupported_claim"
       ],
       "variant": "prompt_b"

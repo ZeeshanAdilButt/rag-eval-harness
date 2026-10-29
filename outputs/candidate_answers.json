@@ -1,0 +1,30 @@
+[
+  {
+    "query_id": "Q1",
+    "answers": {
+      "prompt_a": "Withdrawal reviews are usually completed within 24 hours for security checks, although some cases may take longer if more verification is needed.",
+      "prompt_b": "Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review."
+    }
+  },
+  {
+    "query_id": "Q2",
+    "answers": {
+      "prompt_a": "Support cannot manually view your existing password. If you need access, use the Forgot password option on the login page.",
+      "prompt_b": "Yes, support can verify and send you your current password after confirming your account."
+    }
+  },
+  {
+    "query_id": "Q3",
+    "answers": {
+      "prompt_a": "A screenshot of your bank app is not accepted. Use a bank statement or utility bill dated within the last 6 months.",
+      "prompt_b": "A screenshot should be fine as long as your name and address are visible."
+    }
+  },
+  {
+    "query_id": "Q4",
+    "answers": {
+      "prompt_a": "No. Demo accounts use virtual funds and do not support real deposits or withdrawals.",
+      "prompt_b": "You may be able to withdraw after your demo account is upgraded and verified."
+    }
+  }
+]

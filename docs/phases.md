@@ -59,5 +59,6 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 
 - The brief's exact sample data arrived late. `data/` now holds it verbatim, replacing the placeholder fixtures.
 - Output shapes now match the brief: `llm_review.json` is a list of records with boolean `overclaim_flags`, its metadata moved to `llm_review_meta.json`, and `failure_taxonomy.json` is written to `outputs/` with the tags for each answer. The prompt went to version 3.
-- One real OpenAI call (`gpt-4.1-2025-04-14`, 1443 tokens in, 441 out) reviewed the new data; later runs replay it.
+- One real OpenAI call (`gpt-4.1-2025-04-14`, one call) reviewed the new data; later runs replay it.
 - Gate: `python run.py && python validate.py && pytest` pass, outputs are byte-identical across runs, CI is green.
+- Follow-up: the stemmer now joins `-ification` and `-ied` forms, so "verified" matches the banned "verification" on Q4; each run also copies its inputs into `outputs/`.

@@ -104,8 +104,7 @@ CI runs all of this on every push with no API key [.github/workflows/ci.yml].
 
 **`prompt_a` is selected and ready to ship.** It wins all four questions.
 
-- `prompt_b` says a withdrawal is "guaranteed" and "instant", offers to "send you your current password", and says a screenshot "should be fine". Each is a banned claim, so each of those answers is vetoed.
-- On the demo-account question, `prompt_b` says you "may be able to withdraw after your demo account is upgraded and verified". The word rules miss the exact banned phrase ("verified" is not "verification"), but the answer still loses: it misses the key fact, is weakly grounded, and the LLM flags it as an overclaim.
+- `prompt_b` says a withdrawal is "guaranteed" and "instant", offers to "send you your current password", says a screenshot "should be fine", and says a demo account can withdraw once "upgraded and verified". Each is a banned claim, so all four `prompt_b` answers are vetoed.
 - The LLM agrees: faithfulness 5 for every `prompt_a` answer, 1 for every `prompt_b` answer.
 
 ## Where to look next

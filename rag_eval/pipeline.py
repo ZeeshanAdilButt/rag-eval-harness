@@ -40,6 +40,8 @@ def run_pipeline(cfg: Config, root: Path, log=print) -> dict:
     data_dir, out_dir = root / cfg.paths.data_dir, root / cfg.paths.out_dir
     inputs = load_inputs(data_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    for name in INPUT_FILES:  # the inputs this run saw, next to what it produced
+        (out_dir / name).write_bytes((data_dir / name).read_bytes().replace(b"\r\n", b"\n"))
 
     store = open_store(cfg.storage, root)
     run_id = str(uuid.uuid4())

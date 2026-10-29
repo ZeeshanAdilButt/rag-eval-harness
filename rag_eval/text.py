@@ -67,6 +67,10 @@ def stem(token: str) -> str:
     """Crude suffix stripping; only has to make 'reviews' meet 'review'."""
     if token.isdigit():
         return token
+    if token.endswith("ification") and len(token) > 11:
+        token = token[: -len("ification")] + "ify"
+    elif token.endswith("ied") and len(token) > 5:
+        token = token[:-3] + "y"
     for suffix in ("ies", "es", "s", "ed", "ing"):
         if suffix == "s" and token.endswith("ss"):
             continue  # "process" is not a plural

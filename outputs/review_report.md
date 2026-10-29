@@ -1,6 +1,6 @@
 # Review report
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 c5484264de17).
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 bc8c467c3b4f).
 
 ## Q1 (medium risk)
 
@@ -118,10 +118,10 @@ LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (
 
 > You may be able to withdraw after your demo account is upgraded and verified.
 
-- Failed checks: must_include; risk flags: unsupported_claim; grounding 0.429
+- Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.429
 - LLM: faithfulness 1, clarity 2, overclaim: yes
-- Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
+- Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in "verified."; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
 
-**LLM winner:** `prompt_a`. `prompt_a` is fully supported by D4, which states that demo accounts do not support real deposits or withdrawals. `prompt_b` is misleading and unsupported, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
+**LLM winner:** `prompt_a`. `prompt_a` is directly supported by D4, which states demo accounts do not support real withdrawals. `prompt_b` is unsupported and misleading, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
 
-**Final pick:** `prompt_a` (lower failure tier).
+**Final pick:** `prompt_a` (only safe candidate).

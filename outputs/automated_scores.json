@@ -105,15 +105,17 @@
   {
     "failures": [
       "missed_key_fact",
+      "policy_violation",
       "unsupported_claim"
     ],
     "grounding_score": 0.429,
     "must_include_pass": false,
-    "must_not_claim_pass": true,
-    "notes": "none of ['virtual funds', 'do not support real deposits or withdrawals'] present; grounding 0.429 below 0.6; weakly supported sentence \"You may be able to withdraw after your demo account is upgraded and verified.\"",
+    "must_not_claim_pass": false,
+    "notes": "none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in \"verified.\"; grounding 0.429 below 0.6; weakly supported sentence \"You may be able to withdraw after your demo account is upgraded and verified.\"",
     "query_id": "Q4",
     "retrieval_hit": true,
     "risk_flags": [
+      "policy_violation",
       "unsupported_claim"
     ],
     "variant": "prompt_b"

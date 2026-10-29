@@ -2,19 +2,19 @@
 
 **Selected variant: `prompt_a`** (ready to ship).
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 c5484264de17).
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 bc8c467c3b4f).
 
 ## Summary
 
 | variant | query wins | vetoes | high-risk vetoes | policy_violation | unsupported_claim | overconfident_tone | missed_key_fact | irrelevant_answer | retrieval_miss | mean grounding | mean faithfulness | mean clarity | high-risk LLM warnings |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `prompt_a` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0.876 | 5.0 | 5.0 | 0 |
-| `prompt_b` | 0 | 3 | 2 | 3 | 2 | 1 | 3 | 0 | 0 | 0.502 | 1.0 | 2.25 | 2 |
+| `prompt_b` | 0 | 4 | 2 | 4 | 2 | 1 | 3 | 0 | 0 | 0.502 | 1.0 | 2.25 | 2 |
 
 ## Top reasons
 
 1. `prompt_a`: 0 high-risk veto(es), 0 veto(es) in total, 0 high-risk LLM warning(s), 4 query win(s), mean tie-break score 0.9628.
-2. `prompt_b`: 2 high-risk veto(es), 3 veto(es) in total, 2 high-risk LLM warning(s), 0 query win(s), mean tie-break score 0.0318.
+2. `prompt_b`: 2 high-risk veto(es), 4 veto(es) in total, 2 high-risk LLM warning(s), 0 query win(s), mean tie-break score 0.0068.
 
 Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then mean score, then name. LLM warnings are ship blockers on the selected variant, never vetoes.
 
@@ -38,11 +38,11 @@ Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then
 - `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.1892; LLM warning: faithfulness 1 <= 2, LLM overclaim flag
 - LLM winner: `prompt_a`. `prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.
 
-### Q4 (medium risk): pick `prompt_a`, lower failure tier
+### Q4 (medium risk): pick `prompt_a`, only safe candidate
 
 - `prompt_a`: clean; score 1.0
-- `prompt_b`: failures: missed_key_fact, unsupported_claim; score -0.0463
-- LLM winner: `prompt_a`. `prompt_a` is fully supported by D4, which states that demo accounts do not support real deposits or withdrawals. `prompt_b` is misleading and unsupported, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
+- `prompt_b`: vetoed by policy_violation; also missed_key_fact, unsupported_claim; score -0.1463
+- LLM winner: `prompt_a`. `prompt_a` is directly supported by D4, which states demo accounts do not support real withdrawals. `prompt_b` is unsupported and misleading, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
 
 ## Clarity versus safety
 

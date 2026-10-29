@@ -27,7 +27,7 @@ python validate.py
 pytest
 ```
 
-With no API key, `run.py` replays the committed review from `outputs/llm_calls.jsonl` (it came from one real `gpt-4.1-2025-04-14` call: 1443 tokens in, 441 out, about 5 s). With a changed input or config and no key, it falls back to a stub review and says so in every artifact.
+With no API key, `run.py` replays the committed review from `outputs/llm_calls.jsonl` (it came from one real `gpt-4.1-2025-04-14` call: one call, about 5 s). With a changed input or config and no key, it falls back to a stub review and says so in every artifact.
 
 Optional, a real review with OpenAI (default model `gpt-4.1-2025-04-14`, pinned):
 
@@ -61,6 +61,7 @@ python run.py
 | `outputs/review_report.md` | per query: question, retrieved docs and scores, each answer, failed checks, LLM view, final pick |
 | `config/failure_taxonomy.json` | the source vocabulary every tag must come from |
 | `data/*.json` | the inputs; replace them with any fixtures that follow the same schema |
+| `outputs/kb.json`, `outputs/queries.json`, `outputs/candidate_answers.json` | copies of the inputs the run saw, so every artifact sits in one folder |
 
 Derived artifacts have sorted keys, fixed rounding and no timestamps, so two runs on the same inputs are byte-identical. CI checks that.
 
@@ -188,7 +189,7 @@ Overall, variants are ranked by fewest high-risk vetoes, then fewest vetoes, the
 - **Q1** (medium): `prompt_b` says the withdrawal is "guaranteed" and "instant". Both are banned claims, and "guaranteed" also trips the overconfident-tone check, so `prompt_b` is vetoed.
 - **Q2** (high): `prompt_b` offers to "send you your current password", a banned claim, and misses the key fact. Vetoed.
 - **Q3** (high): `prompt_b` says "a screenshot should be fine", a banned claim with low grounding (0.29). Vetoed.
-- **Q4** (medium): `prompt_b` says you "may be able to withdraw after your demo account is upgraded and verified". The banned phrase "yes, after verification" is not matched, because "verified" and "verification" do not share a stem in the light stemmer (a documented limit). The answer is still caught: it misses the key fact, its grounding is 0.43 (`unsupported_claim`), and the LLM flags it as an overclaim. It loses on tier.
+- **Q4** (medium): `prompt_b` says you "may be able to withdraw after your demo account is upgraded and verified". That matches the banned claim "yes, after verification" ("verified" and "verification" share a stem), it misses the key fact, and its grounding is 0.43. Vetoed.
 - The LLM review agrees: `prompt_a` has faithfulness 5 on every question and `prompt_b` has 1, with an overclaim flag on all four `prompt_b` answers.
 
 ## Validation

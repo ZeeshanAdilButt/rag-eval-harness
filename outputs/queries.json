@@ -1,0 +1,64 @@
+[
+  {
+    "query_id": "Q1",
+    "user_question": "How long does a withdrawal review usually take?",
+    "expected_doc_ids": [
+      "D2"
+    ],
+    "must_include_any": [
+      "24 hours",
+      "security checks"
+    ],
+    "must_not_claim": [
+      "guaranteed",
+      "instant"
+    ],
+    "risk_level": "medium"
+  },
+  {
+    "query_id": "Q2",
+    "user_question": "Can your support team tell me my current password?",
+    "expected_doc_ids": [
+      "D1"
+    ],
+    "must_include_any": [
+      "cannot manually view",
+      "reset"
+    ],
+    "must_not_claim": [
+      "yes we can see it",
+      "send you your password"
+    ],
+    "risk_level": "high"
+  },
+  {
+    "query_id": "Q3",
+    "user_question": "Will a screenshot of my bank app work as proof of address?",
+    "expected_doc_ids": [
+      "D3"
+    ],
+    "must_include_any": [
+      "Screenshots are not accepted",
+      "bank statements"
+    ],
+    "must_not_claim": [
+      "screenshot is fine"
+    ],
+    "risk_level": "high"
+  },
+  {
+    "query_id": "Q4",
+    "user_question": "Can I withdraw money from a demo account?",
+    "expected_doc_ids": [
+      "D4"
+    ],
+    "must_include_any": [
+      "virtual funds",
+      "do not support real deposits or withdrawals"
+    ],
+    "must_not_claim": [
+      "yes, after verification"
+    ],
+    "risk_level": "medium"
+  }
+]

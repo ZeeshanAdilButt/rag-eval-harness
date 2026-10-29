@@ -166,3 +166,8 @@ def test_stemmer_joins_plurals_and_keeps_double_s():
     assert stem("process") == stem("processes")
     assert stem("policies") == stem("policy")
     assert stem("address") == stem("addresses")
+
+
+def test_stemmer_joins_ification_and_ied_forms():
+    assert stem("verification") == stem("verified") == stem("verify")
+    assert claim_made("You may withdraw after your account is upgraded and verified.", "yes, after verification")

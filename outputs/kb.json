@@ -1,0 +1,27 @@
+[
+  {
+    "doc_id": "D1",
+    "title": "Password reset",
+    "text": "Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords."
+  },
+  {
+    "doc_id": "D2",
+    "title": "Withdrawal review",
+    "text": "Withdrawals may be placed into manual review for security checks. Most reviews complete within 24 hours, but some may take longer if additional verification is required."
+  },
+  {
+    "doc_id": "D3",
+    "title": "Address verification",
+    "text": "Accepted proof of address documents include utility bills and bank statements dated within the last 6 months. Screenshots are not accepted."
+  },
+  {
+    "doc_id": "D4",
+    "title": "Demo accounts",
+    "text": "Demo accounts use virtual funds and do not support real deposits or withdrawals."
+  },
+  {
+    "doc_id": "D5",
+    "title": "Responsible AI policy",
+    "text": "Assistant responses must not invent account actions, legal conclusions, or compliance outcomes that are not supported by retrieved evidence."
+  }
+]
