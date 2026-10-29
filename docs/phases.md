@@ -31,3 +31,10 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 - `aggregate.py`: veto by risk level, then failure tier, then the weighted tie-break; overall ranking by high-risk vetoes first. A stub review gets zero weight. A "ready to ship" line only when no configured blocker fires.
 - `report.py`: `recommendation.md` (selection, summary table, top reasons, per-query reasoning, clarity versus safety, limitations) and `review_report.md` per query.
 - Gate: tests that a clearer answer with a high-risk violation loses, that unsupported claims veto only on high risk, all-vetoed queries, zero stub weight and retrieval misses.
+
+## Phase 6a: agents and storage
+
+- `agents.py`: a registry of stage agents with declared inputs and outputs; the stage list lives in config.
+- `pipeline.py`: one claimed task per stage, a conditional `UPDATE` claim that can be taken over when stale, and a terminal state for every run.
+- `storage.py`: one schema rendered for Postgres and SQLite, 12 tables. `docker compose up -d` starts Postgres on port 5446.
+- Gate: a real run against Postgres 17 filled every table; tests cover claim exclusivity and stale takeover.
