@@ -22,7 +22,7 @@
     "model": "gpt-4.1-2025-04-14",
     "prompt_name": "comparative_review",
     "prompt_sha256": "09fa8409e72709ce4f0c87377a44016b52bea2b8b099154465995e6511f862f1",
-    "prompt_template_sha256": "3e01aa8de2be0dc4a8d62fe1ac520f7b61d6743734ee6a0c5e61302d4f6f687b",
+    "prompt_template_sha256": "ce66ce0d0f346acaf1589d5587199838c579e08e71d6bd5091a823b0a6f08519",
     "prompt_version": "2",
     "provider": "openai_compatible",
     "reason": "cached reply with the same prompt hash",

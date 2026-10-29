@@ -56,7 +56,7 @@ class PromptTemplate:
 
     @classmethod
     def load(cls, path: Path) -> "PromptTemplate":
-        raw = path.read_bytes()
+        raw = path.read_bytes().replace(b"\r\n", b"\n")  # same hash on every OS
         data = tomllib.loads(raw.decode("utf-8"))
         return cls(
             name=data["name"],

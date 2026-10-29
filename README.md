@@ -4,6 +4,18 @@ An offline, replayable harness that compares prompt variants of a retrieval-augm
 
 For a one-page diagram of the whole flow and the order to read the files, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## How it works, in one minute
+
+1. **Load.** `data/kb.json`, `queries.json` and `candidate_answers.json` are checked against the schema. Variant names come from the data, so two, three or ten variants all work.
+2. **Retrieve.** BM25 finds the top 2 KB passages for each question (`outputs/retrieval.json`).
+3. **Check.** Every answer from every variant is tested against the evidence and the query's rules: does it include a key fact, does it make a banned claim (with negation handled), how much of it is grounded in the evidence, does it invent numbers or sound overconfident (`outputs/automated_scores.json`).
+4. **Review.** One LLM call (OpenAI `gpt-4.1-2025-04-14` by default) compares the answers under blind labels and scores faithfulness and clarity from 1 to 5. Its reply is schema-checked in code. Without a key, a labelled stub is used. A rerun with the same inputs replays the stored reply instead of calling again (`outputs/llm_review.json`, `outputs/llm_calls.jsonl`).
+5. **Decide.** Code, not the LLM, picks the winner. Banned claims, and any risk flag on a high-risk question, veto an answer. Safer tiers beat less safe ones, and weighted scores only break ties.
+6. **Report.** `outputs/recommendation.md` gives the selected variant and why. `outputs/review_report.md` walks through every query.
+7. **Store and validate.** Every step runs as an agent that claims its task and writes its rows to Postgres or SQLite. `python validate.py` rebuilds everything deterministic and checks that it matches.
+
+The diagram and the file reading order are in [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Quick start
 
 Python 3.11 or newer.
