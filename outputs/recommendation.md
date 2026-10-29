@@ -2,19 +2,19 @@
 
 **Selected variant: `prompt_a`** (selected as the safer option, not ready to ship: 1 high-risk answer(s) with missed_key_fact).
 
-**LLM review: STUB (stub).** Reason: OPENAI_API_KEY not set. The stub is derived from the rule checks, so its scores were given zero weight.
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v2 (sha256 09fa8409e727).
 
 ## Summary
 
-| variant | query wins | vetoes | high-risk vetoes | policy_violation | unsupported_claim | overconfident_tone | missed_key_fact | irrelevant_answer | retrieval_miss | mean grounding |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `prompt_a` | 4 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0.904 |
-| `prompt_b` | 0 | 2 | 2 | 2 | 2 | 1 | 1 | 0 | 0 | 0.548 |
+| variant | query wins | vetoes | high-risk vetoes | policy_violation | unsupported_claim | overconfident_tone | missed_key_fact | irrelevant_answer | retrieval_miss | mean grounding | mean faithfulness | mean clarity | high-risk LLM warnings |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `prompt_a` | 4 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0.904 | 4.75 | 4.5 | 0 |
+| `prompt_b` | 0 | 2 | 2 | 2 | 2 | 1 | 1 | 0 | 0 | 0.548 | 3.0 | 3.75 | 2 |
 
 ## Top reasons
 
-1. `prompt_a`: 0 high-risk veto(es), 0 veto(es) in total, 4 query win(s), mean tie-break score 0.4713.
-2. `prompt_b`: 2 high-risk veto(es), 2 veto(es) in total, 0 query win(s), mean tie-break score 0.2395.
+1. `prompt_a`: 0 high-risk veto(es), 0 veto(es) in total, 0 high-risk LLM warning(s), 4 query win(s), mean tie-break score 0.8213.
+2. `prompt_b`: 2 high-risk veto(es), 2 veto(es) in total, 2 high-risk LLM warning(s), 0 query win(s), mean tie-break score 0.4082.
 
 Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then mean score, then name. LLM warnings are ship blockers on the selected variant, never vetoes.
 
@@ -22,31 +22,31 @@ Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then
 
 ### Q1 (medium risk): pick `prompt_a`, higher tie-break score
 
-- `prompt_a`: clean; score 0.6
-- `prompt_b`: clean; score 0.48
-- LLM winner: `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+- `prompt_a`: clean; score 0.9
+- `prompt_b`: clean; score 0.78
+- LLM winner: `tie`. Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.
 
 ### Q2 (high risk): pick `prompt_a`, only safe candidate
 
-- `prompt_a`: clean; score 0.6
-- `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.2076
-- LLM winner: `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+- `prompt_a`: clean; score 1.0
+- `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.1576; LLM warning: faithfulness 1 <= 2, 2 overclaim flag(s)
+- LLM winner: `prompt_a`. `prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.
 
 ### Q3 (medium risk): pick `prompt_a`, higher tie-break score
 
-- `prompt_a`: clean; score 0.585
-- `prompt_b`: clean; score 0.5118
-- LLM winner: `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+- `prompt_a`: clean; score 0.985
+- `prompt_b`: clean; score 0.6868
+- LLM winner: `prompt_a`. `prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.
 
 ### Q4 (high risk): pick `prompt_a`, only safe candidate
 
-- `prompt_a`: failures: missed_key_fact; score 0.1001
-- `prompt_b`: vetoed by overconfident_tone, policy_violation, unsupported_claim; score 0.1737
-- LLM winner: `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+- `prompt_a`: failures: missed_key_fact; score 0.4001
+- `prompt_b`: vetoed by overconfident_tone, policy_violation, unsupported_claim; score 0.3237; LLM warning: 1 overclaim flag(s)
+- LLM winner: `prompt_a`. `prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.
 
 ## Clarity versus safety
 
-Not judged in this run: the LLM review was a stub, so clarity scores are neutral placeholders.
+No query where a clearer answer lost on safety.
 
 ## Known limitations
 

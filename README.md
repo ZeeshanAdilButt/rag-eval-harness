@@ -15,7 +15,7 @@ python validate.py
 pytest
 ```
 
-With no API key, `run.py` uses the stub review and says so in every artifact. The committed `outputs/` come from that path, because no key was available when they were built.
+With no API key, `run.py` replays the committed review from `outputs/llm_calls.jsonl` (it came from one real `gpt-4.1-2025-04-14` call: 1925 tokens in, 463 out, about 5 s). With a changed input or config and no key, it falls back to a stub review and says so in every artifact.
 
 Optional, a real review with OpenAI (default model `gpt-4.1-2025-04-14`, pinned):
 
@@ -167,7 +167,7 @@ Overall, variants are ranked by fewest high-risk vetoes, then fewest vetoes, the
 
 **Clarity versus safety.** When the LLM rates a losing variant clearer than the winner, the recommendation names it, with both clarity scores and the veto that sank it. A clear but wrong answer to a high-risk question does more harm than a plain correct one, so safety comes first and clarity only breaks ties.
 
-### Result on the sample data (stub review)
+### Result on the sample data (live review, replayed)
 
 `prompt_a` is selected but **not ready to ship**:
 

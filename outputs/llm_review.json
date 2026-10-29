@@ -25,43 +25,43 @@
     "prompt_template_sha256": "3e01aa8de2be0dc4a8d62fe1ac520f7b61d6743734ee6a0c5e61302d4f6f687b",
     "prompt_version": "2",
     "provider": "openai_compatible",
-    "reason": "OPENAI_API_KEY not set",
-    "source": "stub",
+    "reason": "cached reply with the same prompt hash",
+    "source": "replay",
     "temperature": 0.0
   },
   "reviews": [
     {
       "clarity": {
-        "prompt_a": 3,
-        "prompt_b": 3
+        "prompt_a": 5,
+        "prompt_b": 5
       },
       "faithfulness": {
         "prompt_a": 5,
-        "prompt_b": 3
+        "prompt_b": 5
       },
-      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
+      "justification": "Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": []
       },
       "query_id": "Q1",
-      "winner": "prompt_a"
+      "winner": "tie"
     },
     {
       "clarity": {
-        "prompt_a": 3,
+        "prompt_a": 5,
         "prompt_b": 3
       },
       "faithfulness": {
         "prompt_a": 5,
         "prompt_b": 1
       },
-      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
+      "justification": "`prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": [
-          "policy_violation",
-          "unsupported_claim"
+          "I have escalated your request",
+          "your withdrawal will be approved within 24 hours"
         ]
       },
       "query_id": "Q2",
@@ -69,14 +69,14 @@
     },
     {
       "clarity": {
-        "prompt_a": 3,
-        "prompt_b": 3
-      },
-      "faithfulness": {
         "prompt_a": 5,
         "prompt_b": 4
       },
-      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
+      "faithfulness": {
+        "prompt_a": 5,
+        "prompt_b": 3
+      },
+      "justification": "`prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": []
@@ -91,15 +91,13 @@
       },
       "faithfulness": {
         "prompt_a": 4,
-        "prompt_b": 1
+        "prompt_b": 3
       },
-      "justification": "[STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.",
+      "justification": "`prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.",
       "overclaim_flags": {
         "prompt_a": [],
         "prompt_b": [
-          "overconfident_tone",
-          "policy_violation",
-          "unsupported_claim"
+          "you will definitely see similar results in a live account"
         ]
       },
       "query_id": "Q4",

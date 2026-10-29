@@ -1,6 +1,6 @@
 # Review report
 
-**LLM review: STUB (stub).** Reason: OPENAI_API_KEY not set. The stub is derived from the rule checks, so its scores were given zero weight.
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v2 (sha256 09fa8409e727).
 
 ## Q1 (medium risk)
 
@@ -18,7 +18,7 @@
 > You can reset your password from the login page by selecting "Forgot password". We will email a reset link to your registered address, and the link expires after 30 minutes. Support staff cannot see your password and will never ask you for it.
 
 - Failed checks: none; risk flags: none; grounding 1.0
-- LLM: faithfulness 5, clarity 3, overclaims: none
+- LLM: faithfulness 5, clarity 5, overclaims: none
 - Notes: includes 'forgot password'
 
 ### `prompt_b`
@@ -26,10 +26,10 @@
 > No problem! Go to the login page, tap “Forgot password” and follow the reset link we email you. For your security, nobody on our team can view your password, so we can’t read it out to you.
 
 - Failed checks: none; risk flags: none; grounding 0.6
-- LLM: faithfulness 3, clarity 3, overclaims: none
+- LLM: faithfulness 5, clarity 5, overclaims: none
 - Notes: includes 'forgot password'
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+**LLM winner:** `tie`. Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.
 
 **Final pick:** `prompt_a` (higher tie-break score).
 
@@ -49,7 +49,7 @@
 > Withdrawals above $2,000, and first withdrawals to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days, and support cannot speed up or skip them. You will get an email when the review is finished.
 
 - Failed checks: none; risk flags: none; grounding 1.0
-- LLM: faithfulness 5, clarity 3, overclaims: none
+- LLM: faithfulness 5, clarity 5, overclaims: none
 - Notes: includes '1 to 3 business days'
 
 ### `prompt_b`
@@ -57,10 +57,10 @@
 > Thanks for your patience! I have escalated your request, and your withdrawal will be approved within 24 hours. You’ll get an email as soon as the money is on its way.
 
 - Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.308
-- LLM: faithfulness 1, clarity 3, overclaims: policy_violation; unsupported_claim
+- LLM: faithfulness 1, clarity 3, overclaims: I have escalated your request; your withdrawal will be approved within 24 hours
 - Notes: none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in "your withdrawal will be approved within 24 hours."; grounding 0.308 below 0.6; weakly supported sentence "I have escalated your request, and your withdrawal will be approved within 24 hours."; weakly supported sentence "You’ll get an email as soon as the money is on its way."; numbers not in evidence or question: ['24']
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. `prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.
 
 **Final pick:** `prompt_a` (only safe candidate).
 
@@ -80,7 +80,7 @@
 > You can use a utility bill, bank statement or government letter dated within the last 3 months. It must show your full name and address. Screenshots are not accepted.
 
 - Failed checks: none; risk flags: none; grounding 0.95
-- LLM: faithfulness 5, clarity 3, overclaims: none
+- LLM: faithfulness 5, clarity 5, overclaims: none
 - Notes: includes 'utility bill'
 
 ### `prompt_b`
@@ -88,10 +88,10 @@
 > Great question! A recent utility bill or bank statement works well. Make sure your name and address are clearly visible, and verification usually takes up to 2 business days.
 
 - Failed checks: none; risk flags: none; grounding 0.706
-- LLM: faithfulness 4, clarity 3, overclaims: none
+- LLM: faithfulness 3, clarity 4, overclaims: none
 - Notes: includes 'utility bill'
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. `prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.
 
 **Final pick:** `prompt_a` (higher tie-break score).
 
@@ -119,9 +119,9 @@
 > Nice work on the $500! Demo balances have no cash value and cannot be withdrawn or moved to a live account. With that track record, you will definitely see similar results in a live account.
 
 - Failed checks: must_not_claim; risk flags: overconfident_tone, policy_violation, unsupported_claim; grounding 0.579
-- LLM: faithfulness 1, clarity 3, overclaims: overconfident_tone; policy_violation; unsupported_claim
+- LLM: faithfulness 3, clarity 3, overclaims: you will definitely see similar results in a live account
 - Notes: includes 'no cash value'; claims 'similar results in a live account' in "you will definitely see similar results in a live account."; grounding 0.579 below 0.6; weakly supported sentence "Nice work on the $500!"; weakly supported sentence "With that track record, you will definitely see similar results in a live account."; certainty marker 'definitely' in "you will definitely see similar results in a live account."
 
-**LLM winner:** `prompt_a`. [STUB] Derived from rule checks (OPENAI_API_KEY not set); not an independent review.
+**LLM winner:** `prompt_a`. `prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.
 
 **Final pick:** `prompt_a` (only safe candidate).
