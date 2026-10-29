@@ -14,3 +14,8 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 - Mid-build the scope grew: each stage runs as a pluggable agent that claims its task, every run is stored in Postgres (SQLite when no `DATABASE_URL`), and configuration is layered like ampwise (defaults, TOML, profile, env, `--set`). Added sections for agents, storage and configuration.
 - Borrowed from the AI engineering course: a versioned prompt file, blind labels in shuffled order for the judge, "length is not a criterion" in the rubric, and per-attempt request logging with tokens, latency and finish reason.
 - Gate: a blind critic reviewed the requirements, design and config without the code. Findings and fixes are under phase 7.
+
+## Phase 3: deterministic stages
+
+- `text.py` (normalisation, stemming, clauses), `schema.py` (input models and clear errors), `config.py` (validated layers), `retrieval.py` (BM25 with doc_id tie-break) and `checks.py` (include, negation-aware banned claims, grounding with refusal handling and number checks, certainty markers, relevance).
+- Gate: tests for banned claims and negation, paraphrase limits, grounding, refusals, retrieval ties and every input error case.
