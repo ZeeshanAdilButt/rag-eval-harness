@@ -57,6 +57,11 @@ def claim_made(answer: str, claim: str) -> str | None:
     if not wanted:
         return None
     claim_negated = is_negated(claim)
+    if len(wanted) == 1:  # one word is too weak for clause-level matching; judge the whole sentence
+        for sentence in sentences(answer):
+            if _covers(sentence, wanted) and is_negated(sentence) == claim_negated:
+                return sentence
+        return None
     for unit in _units(answer):
         if _covers(unit, wanted) and negated_near(unit, wanted) == claim_negated:
             return unit

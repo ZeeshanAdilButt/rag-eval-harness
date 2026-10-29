@@ -171,3 +171,9 @@ def test_stemmer_joins_plurals_and_keeps_double_s():
 def test_stemmer_joins_ification_and_ied_forms():
     assert stem("verification") == stem("verified") == stem("verify")
     assert claim_made("You may withdraw after your account is upgraded and verified.", "yes, after verification")
+
+
+def test_one_word_claim_is_negated_by_its_sentence():
+    claim = "yes, after verification"
+    assert claim_made("No. Demo funds use virtual money, so you can't withdraw, even after verification.", claim) is None
+    assert claim_made("You can withdraw after verification.", claim)

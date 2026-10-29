@@ -20,7 +20,7 @@
     "grounding_score": 0.667,
     "must_include_pass": true,
     "must_not_claim_pass": false,
-    "notes": "includes '24 hours'; claims 'guaranteed' in \"Your withdrawal is guaranteed to clear within 24 hours\"; claims 'instant' in \"is usually instant after review.\"; certainty marker 'guaranteed' in \"Your withdrawal is guaranteed to clear within 24 hours\"",
+    "notes": "includes '24 hours'; claims 'guaranteed' in \"Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review.\"; claims 'instant' in \"Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review.\"; certainty marker 'guaranteed' in \"Your withdrawal is guaranteed to clear within 24 hours\"",
     "query_id": "Q1",
     "retrieval_hit": true,
     "risk_flags": [
@@ -111,7 +111,7 @@
     "grounding_score": 0.429,
     "must_include_pass": false,
     "must_not_claim_pass": false,
-    "notes": "none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in \"verified.\"; grounding 0.429 below 0.6; weakly supported sentence \"You may be able to withdraw after your demo account is upgraded and verified.\"",
+    "notes": "none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in \"You may be able to withdraw after your demo account is upgraded and verified.\"; grounding 0.429 below 0.6; weakly supported sentence \"You may be able to withdraw after your demo account is upgraded and verified.\"",
     "query_id": "Q4",
     "retrieval_hit": true,
     "risk_flags": [

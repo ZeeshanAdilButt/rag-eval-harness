@@ -23,8 +23,8 @@ class _Strict(BaseModel):
 
 
 def _ident(value: str) -> str:
-    if not value or any(ch.isspace() for ch in value):
-        raise ValueError("must be non-empty and contain no whitespace")
+    if not value.strip():
+        raise ValueError("must be non-empty")
     return value
 
 

@@ -32,7 +32,7 @@ How to read this: `retrieval_hit` means an expected doc was in the top 2, `must_
 
 - Failed checks: must_not_claim; risk flags: overconfident_tone, policy_violation; grounding 0.667
 - LLM: faithfulness 1, clarity 3, overclaim: yes
-- Notes: includes '24 hours'; claims 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"; claims 'instant' in "is usually instant after review."; certainty marker 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"
+- Notes: includes '24 hours'; claims 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review."; claims 'instant' in "Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review."; certainty marker 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"
 
 **LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence."
 
@@ -134,7 +134,7 @@ How to read this: `retrieval_hit` means an expected doc was in the top 2, `must_
 
 - Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.429
 - LLM: faithfulness 1, clarity 2, overclaim: yes
-- Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in "verified."; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
+- Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; claims 'yes, after verification' in "You may be able to withdraw after your demo account is upgraded and verified."; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
 
 **LLM winner:** `prompt_a`. LLM note (unverified): "`prompt_a` is directly supported by D4, which states demo accounts do not support real deposits or withdrawals. `prompt_b` invents the possibility of withdrawal after upgrading and verification, which is not mentioned in the evidence."
 

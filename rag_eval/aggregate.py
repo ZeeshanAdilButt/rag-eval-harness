@@ -44,7 +44,6 @@ def aggregate(queries: list[dict], variants: list[str], scores: list[dict], revi
     use_llm = not (cfg.ignore_llm_weights_for_stub and not live)
     per_query = []
     tally = {v: Counter() for v in variants}
-    name_wins = Counter()
 
     for q in queries:
         qid, risk = q["query_id"], q["risk_level"]
@@ -79,8 +78,8 @@ def aggregate(queries: list[dict], variants: list[str], scores: list[dict], revi
             else:
                 reason = "tie broken by name" if tie else "higher tie-break score"
             winner = pick["variant"]
-            tally[winner]["wins"] += 1
-            name_wins[winner] += tie
+            tally[winner]["wins"] += not tie
+            tally[winner]["name_tie_picks"] += tie
         else:
             winner, reason = "none", "every candidate was vetoed"
 
@@ -106,7 +105,7 @@ def aggregate(queries: list[dict], variants: list[str], scores: list[dict], revi
     ranking = sorted(variants, key=lambda v: (*rank_key(v), v))
     # Wins that only the name decided are not a preference, so they do not count toward telling the top two apart.
     def tie_key(v: str) -> tuple:
-        return (tally[v]["high_risk_vetoes"], tally[v]["vetoes"], -(tally[v]["wins"] - name_wins[v]), -mean_score[v])
+        return (tally[v]["high_risk_vetoes"], tally[v]["vetoes"], -tally[v]["wins"], -mean_score[v])
 
     overall_tie = len(ranking) > 1 and tie_key(ranking[0]) == tie_key(ranking[1])
     selected = ranking[0]

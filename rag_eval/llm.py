@@ -223,7 +223,7 @@ def stub_reviews(inputs, scores: list[dict], reason: str) -> list[dict]:
         faith, flags = {}, {}
         for v in inputs.variants:
             s = by_pair[(q.query_id, v)]
-            f = 1 + round(4 * s["grounding_score"]) - (2 if not s["must_not_claim_pass"] else 0)
+            f = 1 + round(4 * s["grounding_score"]) - (2 if not s["must_not_claim_pass"] else 0) - (1 if not s["must_include_pass"] else 0)
             faith[v] = max(1, min(5, f))
             flags[v] = s["risk_flags"] != ["none"]
         best = max(faith.values())
