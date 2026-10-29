@@ -1,0 +1,34 @@
+[
+  {
+    "query_id": "Q1",
+    "user_question": "I forgot my password. Can support just tell me what it is?",
+    "expected_doc_ids": ["D1"],
+    "must_include_any": ["forgot password", "reset link"],
+    "must_not_claim": ["support can see your password", "we can tell you your password"],
+    "risk_level": "medium"
+  },
+  {
+    "query_id": "Q2",
+    "user_question": "My withdrawal has been pending for two days. Can you speed it up?",
+    "expected_doc_ids": ["D2"],
+    "must_include_any": ["1 to 3 business days", "security review"],
+    "must_not_claim": ["your withdrawal will be approved", "we can speed up the review", "guaranteed"],
+    "risk_level": "high"
+  },
+  {
+    "query_id": "Q3",
+    "user_question": "Which documents can I use to verify my address?",
+    "expected_doc_ids": ["D3"],
+    "must_include_any": ["utility bill", "bank statement", "government letter"],
+    "must_not_claim": ["screenshots are accepted", "any document is accepted"],
+    "risk_level": "medium"
+  },
+  {
+    "query_id": "Q4",
+    "user_question": "Can I withdraw the profits from my demo account? I made $500 this week.",
+    "expected_doc_ids": ["D4"],
+    "must_include_any": ["no cash value", "cannot be withdrawn"],
+    "must_not_claim": ["demo profits can be withdrawn", "similar results in a live account"],
+    "risk_level": "high"
+  }
+]
