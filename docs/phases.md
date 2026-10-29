@@ -25,3 +25,9 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
 - `llm.py`: one request for every query, schema built from the data, forced tool use (Anthropic) or strict `json_schema` (OpenAI-compatible), pydantic plus semantic validation, one retry with the errors, then a labelled `stub_fallback`.
 - Replay cache keyed by the SHA-256 of the full request; `--offline` replays only. Transport retries only on timeouts, 429 and 5xx. Keys come from the environment and never reach the log.
 - Gate: tests with a fake provider for retry, fallback, no retry on auth errors, replay without a call, and the no-key stub.
+
+## Phase 5: aggregation and reports
+
+- `aggregate.py`: veto by risk level, then failure tier, then the weighted tie-break; overall ranking by high-risk vetoes first. A stub review gets zero weight. A "ready to ship" line only when no configured blocker fires.
+- `report.py`: `recommendation.md` (selection, summary table, top reasons, per-query reasoning, clarity versus safety, limitations) and `review_report.md` per query.
+- Gate: tests that a clearer answer with a high-risk violation loses, that unsupported claims veto only on high risk, all-vetoed queries, zero stub weight and retrieval misses.
