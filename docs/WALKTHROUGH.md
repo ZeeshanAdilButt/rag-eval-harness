@@ -53,7 +53,7 @@ Each answer from each variant goes through the same checklist:
 
 Every problem gets a code from a fixed list [config/failure_taxonomy.json], such as `policy_violation`, `unsupported_claim`, `missed_key_fact` or `overconfident_tone`.
 
-Output: [outputs/automated_scores.json]
+Output: [outputs/automated_scores.json], and the tags for each answer in [outputs/failure_taxonomy.json]
 
 ## 5. Ask an LLM for a second opinion, once
 
@@ -65,7 +65,7 @@ The reply has to fit a strict schema, and the code checks it again. If it doesn'
 
 Every attempt is logged [outputs/llm_calls.jsonl]. On the next run with the same inputs, the stored reply is **replayed** and no API call is made.
 
-Output: [outputs/llm_review.json]
+Output: [outputs/llm_review.json] (one record per question, in the brief's shape) and [outputs/llm_review_meta.json] (model, prompt version and hash)
 
 ## 6. Make the decision in code
 
@@ -102,10 +102,11 @@ CI runs all of this on every push with no API key [.github/workflows/ci.yml].
 
 ## What came out on the sample data
 
-**`prompt_a` is selected but not ready to ship.**
+**`prompt_a` is selected and ready to ship.** It wins all four questions.
 
-- `prompt_b` reads friendlier, but it promised a withdrawal "will be approved within 24 hours" and told a demo user they "will definitely see similar results". Both were vetoed as high-risk.
-- `prompt_a` was safe everywhere, but on the demo-account question it never said that demo money has no cash value. That gap blocks shipping until it's fixed.
+- `prompt_b` says a withdrawal is "guaranteed" and "instant", offers to "send you your current password", and says a screenshot "should be fine". Each is a banned claim, so each of those answers is vetoed.
+- On the demo-account question, `prompt_b` says you "may be able to withdraw after your demo account is upgraded and verified". The word rules miss the exact banned phrase ("verified" is not "verification"), but the answer still loses: it misses the key fact, is weakly grounded, and the LLM flags it as an overclaim.
+- The LLM agrees: faithfulness 5 for every `prompt_a` answer, 1 for every `prompt_b` answer.
 
 ## Where to look next
 

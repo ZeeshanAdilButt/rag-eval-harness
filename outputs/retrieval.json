@@ -3,16 +3,16 @@
     "query_id": "Q1",
     "retrieved": [
       {
-        "doc_id": "D1",
-        "score": 5.6723,
-        "text": "To reset your password, open the login page and select \"Forgot password\". We email a reset link to the address registered on your account, and the link expires after 30 minutes. Support staff cannot see or retrieve your password and will never ask you for it. If you no longer have access to that email address, contact support so we can verify your identity before the email on the account is changed.",
-        "title": "Password reset"
+        "doc_id": "D2",
+        "score": 4.8357,
+        "text": "Withdrawals may be placed into manual review for security checks. Most reviews complete within 24 hours, but some may take longer if additional verification is required.",
+        "title": "Withdrawal review"
       },
       {
-        "doc_id": "D2",
-        "score": 1.6698,
-        "text": "Withdrawals above $2,000, and the first withdrawal to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days. Support cannot speed up or skip a review and cannot promise a completion time. You will receive an email when the review is finished.",
-        "title": "Withdrawal review"
+        "doc_id": "D1",
+        "score": 1.1622,
+        "text": "Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.",
+        "title": "Password reset"
       }
     ]
   },
@@ -20,16 +20,16 @@
     "query_id": "Q2",
     "retrieved": [
       {
-        "doc_id": "D2",
-        "score": 4.5528,
-        "text": "Withdrawals above $2,000, and the first withdrawal to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days. Support cannot speed up or skip a review and cannot promise a completion time. You will receive an email when the review is finished.",
-        "title": "Withdrawal review"
+        "doc_id": "D1",
+        "score": 4.6743,
+        "text": "Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.",
+        "title": "Password reset"
       },
       {
-        "doc_id": "D3",
-        "score": 0.9244,
-        "text": "To verify your address, upload a utility bill, bank statement or government letter dated within the last 3 months that shows your full name and address. Screenshots, and documents in a name other than the account holder's, are not accepted. Verification usually takes up to 2 business days.",
-        "title": "Address verification"
+        "doc_id": "D4",
+        "score": 0.6529,
+        "text": "Demo accounts use virtual funds and do not support real deposits or withdrawals.",
+        "title": "Demo accounts"
       }
     ]
   },
@@ -38,14 +38,14 @@
     "retrieved": [
       {
         "doc_id": "D3",
-        "score": 3.8915,
-        "text": "To verify your address, upload a utility bill, bank statement or government letter dated within the last 3 months that shows your full name and address. Screenshots, and documents in a name other than the account holder's, are not accepted. Verification usually takes up to 2 business days.",
+        "score": 6.2171,
+        "text": "Accepted proof of address documents include utility bills and bank statements dated within the last 6 months. Screenshots are not accepted.",
         "title": "Address verification"
       },
       {
         "doc_id": "D1",
-        "score": 2.7481,
-        "text": "To reset your password, open the login page and select \"Forgot password\". We email a reset link to the address registered on your account, and the link expires after 30 minutes. Support staff cannot see or retrieve your password and will never ask you for it. If you no longer have access to that email address, contact support so we can verify your identity before the email on the account is changed.",
+        "score": 0.0,
+        "text": "Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.",
         "title": "Password reset"
       }
     ]
@@ -55,15 +55,15 @@
     "retrieved": [
       {
         "doc_id": "D4",
-        "score": 3.6578,
-        "text": "Demo accounts let you practise trading with virtual funds. Demo balances have no cash value and cannot be withdrawn or transferred to a live account. Results in a demo account do not guarantee results in a live account. You can reset a demo account to its starting balance from the settings page.",
+        "score": 3.6911,
+        "text": "Demo accounts use virtual funds and do not support real deposits or withdrawals.",
         "title": "Demo accounts"
       },
       {
-        "doc_id": "D2",
-        "score": 0.8679,
-        "text": "Withdrawals above $2,000, and the first withdrawal to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days. Support cannot speed up or skip a review and cannot promise a completion time. You will receive an email when the review is finished.",
-        "title": "Withdrawal review"
+        "doc_id": "D1",
+        "score": 1.7406,
+        "text": "Users can reset their password from the login page using the 'Forgot password' link. Password reset emails usually arrive within 5 minutes. Support agents cannot manually view existing passwords.",
+        "title": "Password reset"
       }
     ]
   }

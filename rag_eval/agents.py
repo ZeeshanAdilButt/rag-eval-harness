@@ -80,6 +80,11 @@ class RuleChecker(Agent):
         rows = run_checks(ctx.inputs, ctx.artifacts["retrieval"], ctx.cfg.checks)
         ctx.artifacts["scores"] = rows
         write_json(ctx.out_dir / "automated_scores.json", rows)
+        vocab = json.loads((ctx.root / ctx.cfg.paths.taxonomy).read_text(encoding="utf-8"))
+        write_json(ctx.out_dir / "failure_taxonomy.json", {
+            "version": vocab["version"], "codes": vocab["codes"],
+            "assignments": [{"query_id": r["query_id"], "variant": r["variant"], "tags": r["failures"]} for r in rows],
+        })
         ctx.store.insert("rule_checks", [{"run_id": ctx.run_id, **r} for r in rows])
         return {"pairs": len(rows), "flagged": sum(r["risk_flags"] != ["none"] for r in rows)}
 
@@ -100,7 +105,8 @@ class LLMReviewer(Agent):
                 for line in res.new_log_lines:
                     fh.write(json.dumps(line, sort_keys=True, ensure_ascii=False) + "\n")
         ctx.artifacts["reviews"], ctx.artifacts["llm_meta"] = res.reviews, res.meta
-        write_json(ctx.out_dir / "llm_review.json", {"meta": res.meta, "reviews": res.reviews})
+        write_json(ctx.out_dir / "llm_review.json", [{**r, "review_source": res.meta["source"]} for r in res.reviews])
+        write_json(ctx.out_dir / "llm_review_meta.json", res.meta)
 
         tmpl = PromptTemplate.load(ctx.root / ctx.cfg.llm.prompt_file)
         ctx.store.insert("prompt_templates", [{"sha256": tmpl.sha256, "name": tmpl.name, "version": tmpl.version,

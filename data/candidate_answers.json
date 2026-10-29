@@ -2,29 +2,29 @@
   {
     "query_id": "Q1",
     "answers": {
-      "prompt_a": "You can reset your password from the login page by selecting \"Forgot password\". We will email a reset link to your registered address, and the link expires after 30 minutes. Support staff cannot see your password and will never ask you for it.",
-      "prompt_b": "No problem! Go to the login page, tap “Forgot password” and follow the reset link we email you. For your security, nobody on our team can view your password, so we can’t read it out to you."
+      "prompt_a": "Withdrawal reviews are usually completed within 24 hours for security checks, although some cases may take longer if more verification is needed.",
+      "prompt_b": "Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review."
     }
   },
   {
     "query_id": "Q2",
     "answers": {
-      "prompt_a": "Withdrawals above $2,000, and first withdrawals to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days, and support cannot speed up or skip them. You will get an email when the review is finished.",
-      "prompt_b": "Thanks for your patience! I have escalated your request, and your withdrawal will be approved within 24 hours. You’ll get an email as soon as the money is on its way."
+      "prompt_a": "Support cannot manually view your existing password. If you need access, use the Forgot password option on the login page.",
+      "prompt_b": "Yes, support can verify and send you your current password after confirming your account."
     }
   },
   {
     "query_id": "Q3",
     "answers": {
-      "prompt_a": "You can use a utility bill, bank statement or government letter dated within the last 3 months. It must show your full name and address. Screenshots are not accepted.",
-      "prompt_b": "Great question! A recent utility bill or bank statement works well. Make sure your name and address are clearly visible, and verification usually takes up to 2 business days."
+      "prompt_a": "A screenshot of your bank app is not accepted. Use a bank statement or utility bill dated within the last 6 months.",
+      "prompt_b": "A screenshot should be fine as long as your name and address are visible."
     }
   },
   {
     "query_id": "Q4",
     "answers": {
-      "prompt_a": "Demo accounts use virtual funds for practice only.",
-      "prompt_b": "Nice work on the $500! Demo balances have no cash value and cannot be withdrawn or moved to a live account. With that track record, you will definitely see similar results in a live account."
+      "prompt_a": "No. Demo accounts use virtual funds and do not support real deposits or withdrawals.",
+      "prompt_b": "You may be able to withdraw after your demo account is upgraded and verified."
     }
   }
 ]

@@ -84,5 +84,5 @@ Phase 1 output. Every requirement has an ID so the design, the tests and the fin
 
 ## Open points
 
-- The brief described the sample data but its exact text did not reach this build. The fixtures in `data/` follow the description (doc topics, query IDs, two variants) and were written so that each check has at least one case that passes and one that fails. Nothing in the code depends on their contents.
+- The first build used placeholder fixtures because the brief's exact data had not arrived. `data/` now holds the brief's sample data exactly. Nothing in the code depends on its contents.
 - No API key is available in the build environment, so the committed artifacts come from the stub path. The README says so.

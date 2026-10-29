@@ -12,7 +12,7 @@ def _row(qid, v, failures=(), grounding=0.9, include=True):
 
 def _review(qid, winner, clarity):
     return {"query_id": qid, "winner": winner, "faithfulness": {"safe": 4, "fluent": 5},
-            "clarity": clarity, "overclaim_flags": {"safe": [], "fluent": []}, "justification": "j"}
+            "clarity": clarity, "overclaim_flags": {"safe": False, "fluent": False}, "justification": "j"}
 
 
 def test_high_risk_policy_violation_vetoes_the_clearer_answer():
@@ -73,7 +73,7 @@ def test_risk_flag_tier_beats_higher_score_on_medium_risk():
 def _llm_case(source, faith, claims):
     scores = [_row("Q1", "safe"), _row("Q1", "fluent", ["irrelevant_answer"])]
     review = {**_review("Q1", "safe", {"safe": 3, "fluent": 3}), "faithfulness": {"safe": faith, "fluent": 5},
-              "overclaim_flags": {"safe": claims, "fluent": []}}
+              "overclaim_flags": {"safe": bool(claims), "fluent": False}}
     return aggregate([{"query_id": "Q1", "risk_level": "high"}], ["safe", "fluent"], scores, [review], source, CFG)
 
 
@@ -89,7 +89,7 @@ def test_llm_low_faithfulness_blocks_high_risk_when_live_not_stub():
 def test_llm_overclaim_blocks_high_risk_but_not_lower_risk():
     assert not _llm_case("replay", 4, ["promises approval"])["ready_to_ship"]
     scores = [_row("Q1", "safe"), _row("Q1", "fluent")]
-    review = {**_review("Q1", "safe", {"safe": 3, "fluent": 3}), "overclaim_flags": {"safe": ["x"], "fluent": []}}
+    review = {**_review("Q1", "safe", {"safe": 3, "fluent": 3}), "overclaim_flags": {"safe": True, "fluent": False}}
     agg = aggregate([{"query_id": "Q1", "risk_level": "medium"}], ["safe", "fluent"], scores, [review], "live", CFG)
     assert agg["ready_to_ship"]
 

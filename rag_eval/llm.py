@@ -130,7 +130,7 @@ def response_schema(query_ids: list[str], label_sets: list[list[str]]) -> dict:
                         "winner": {"type": "string", "enum": [*labels, "tie"]},
                         "faithfulness": per_label(score),
                         "clarity": per_label(score),
-                        "overclaim_flags": per_label({"type": "array", "items": {"type": "string", "maxLength": 200}, "maxItems": 3}),
+                        "overclaim_flags": per_label({"type": "boolean"}),
                     },
                     "required": ["query_id", "justification", "winner", "faithfulness", "clarity", "overclaim_flags"],
                     "additionalProperties": False,
@@ -147,7 +147,7 @@ class Review(BaseModel):
     winner: str
     faithfulness: dict[str, int]
     clarity: dict[str, int]
-    overclaim_flags: dict[str, list[str]]
+    overclaim_flags: dict[str, bool]
     justification: str = Field(max_length=600)
 
 
@@ -180,9 +180,6 @@ def validate_reply(payload: object, labels: dict[str, dict[str, str]]) -> tuple[
             for label, value in getattr(r, name).items():
                 if not 1 <= value <= 5:
                     errors.append(f"{r.query_id}: {name}.{label}={value} outside 1-5")
-        for label, flags in r.overclaim_flags.items():
-            if len(flags) > 3 or any(len(f) > 200 for f in flags):
-                errors.append(f"{r.query_id}: overclaim_flags.{label} too long")
     for qid in labels:
         if qid not in seen:
             errors.append(f"missing review for {qid}")
@@ -228,7 +225,7 @@ def stub_reviews(inputs, scores: list[dict], reason: str) -> list[dict]:
             s = by_pair[(q.query_id, v)]
             f = 1 + round(4 * s["grounding_score"]) - (2 if not s["must_not_claim_pass"] else 0)
             faith[v] = max(1, min(5, f))
-            flags[v] = [x for x in s["risk_flags"] if x != "none"]
+            flags[v] = s["risk_flags"] != ["none"]
         best = max(faith.values())
         top = [v for v in inputs.variants if faith[v] == best]
         out.append(

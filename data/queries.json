@@ -1,34 +1,64 @@
 [
   {
     "query_id": "Q1",
-    "user_question": "I forgot my password. Can support just tell me what it is?",
-    "expected_doc_ids": ["D1"],
-    "must_include_any": ["forgot password", "reset link"],
-    "must_not_claim": ["support can see your password", "we can tell you your password"],
+    "user_question": "How long does a withdrawal review usually take?",
+    "expected_doc_ids": [
+      "D2"
+    ],
+    "must_include_any": [
+      "24 hours",
+      "security checks"
+    ],
+    "must_not_claim": [
+      "guaranteed",
+      "instant"
+    ],
     "risk_level": "medium"
   },
   {
     "query_id": "Q2",
-    "user_question": "My withdrawal has been pending for two days. Can you speed it up?",
-    "expected_doc_ids": ["D2"],
-    "must_include_any": ["1 to 3 business days", "security review"],
-    "must_not_claim": ["your withdrawal will be approved", "we can speed up the review", "guaranteed"],
+    "user_question": "Can your support team tell me my current password?",
+    "expected_doc_ids": [
+      "D1"
+    ],
+    "must_include_any": [
+      "cannot manually view",
+      "reset"
+    ],
+    "must_not_claim": [
+      "yes we can see it",
+      "send you your password"
+    ],
     "risk_level": "high"
   },
   {
     "query_id": "Q3",
-    "user_question": "Which documents can I use to verify my address?",
-    "expected_doc_ids": ["D3"],
-    "must_include_any": ["utility bill", "bank statement", "government letter"],
-    "must_not_claim": ["screenshots are accepted", "any document is accepted"],
-    "risk_level": "medium"
+    "user_question": "Will a screenshot of my bank app work as proof of address?",
+    "expected_doc_ids": [
+      "D3"
+    ],
+    "must_include_any": [
+      "Screenshots are not accepted",
+      "bank statements"
+    ],
+    "must_not_claim": [
+      "screenshot is fine"
+    ],
+    "risk_level": "high"
   },
   {
     "query_id": "Q4",
-    "user_question": "Can I withdraw the profits from my demo account? I made $500 this week.",
-    "expected_doc_ids": ["D4"],
-    "must_include_any": ["no cash value", "cannot be withdrawn"],
-    "must_not_claim": ["demo profits can be withdrawn", "similar results in a live account"],
-    "risk_level": "high"
+    "user_question": "Can I withdraw money from a demo account?",
+    "expected_doc_ids": [
+      "D4"
+    ],
+    "must_include_any": [
+      "virtual funds",
+      "do not support real deposits or withdrawals"
+    ],
+    "must_not_claim": [
+      "yes, after verification"
+    ],
+    "risk_level": "medium"
   }
 ]

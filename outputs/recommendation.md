@@ -1,48 +1,48 @@
 # Recommendation
 
-**Selected variant: `prompt_a`** (selected as the safer option, not ready to ship: 1 high-risk answer(s) with missed_key_fact).
+**Selected variant: `prompt_a`** (ready to ship).
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v2 (sha256 09fa8409e727).
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 c5484264de17).
 
 ## Summary
 
 | variant | query wins | vetoes | high-risk vetoes | policy_violation | unsupported_claim | overconfident_tone | missed_key_fact | irrelevant_answer | retrieval_miss | mean grounding | mean faithfulness | mean clarity | high-risk LLM warnings |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `prompt_a` | 4 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0.904 | 4.75 | 4.5 | 0 |
-| `prompt_b` | 0 | 2 | 2 | 2 | 2 | 1 | 1 | 0 | 0 | 0.548 | 3.0 | 3.75 | 2 |
+| `prompt_a` | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0.876 | 5.0 | 5.0 | 0 |
+| `prompt_b` | 0 | 3 | 2 | 3 | 2 | 1 | 3 | 0 | 0 | 0.502 | 1.0 | 2.25 | 2 |
 
 ## Top reasons
 
-1. `prompt_a`: 0 high-risk veto(es), 0 veto(es) in total, 0 high-risk LLM warning(s), 4 query win(s), mean tie-break score 0.8213.
-2. `prompt_b`: 2 high-risk veto(es), 2 veto(es) in total, 2 high-risk LLM warning(s), 0 query win(s), mean tie-break score 0.4082.
+1. `prompt_a`: 0 high-risk veto(es), 0 veto(es) in total, 0 high-risk LLM warning(s), 4 query win(s), mean tie-break score 0.9628.
+2. `prompt_b`: 2 high-risk veto(es), 3 veto(es) in total, 2 high-risk LLM warning(s), 0 query win(s), mean tie-break score 0.0318.
 
 Ranking order: fewest high-risk vetoes, then fewest vetoes, then most wins, then mean score, then name. LLM warnings are ship blockers on the selected variant, never vetoes.
 
 ## Per-query reasoning
 
-### Q1 (medium risk): pick `prompt_a`, higher tie-break score
+### Q1 (medium risk): pick `prompt_a`, only safe candidate
 
-- `prompt_a`: clean; score 0.9
-- `prompt_b`: clean; score 0.78
-- LLM winner: `tie`. Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.
+- `prompt_a`: clean; score 0.9436
+- `prompt_b`: vetoed by policy_violation; also overconfident_tone; score 0.3501
+- LLM winner: `prompt_a`. `prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence.
 
 ### Q2 (high risk): pick `prompt_a`, only safe candidate
 
+- `prompt_a`: clean; score 0.9307
+- `prompt_b`: vetoed by policy_violation; also missed_key_fact; score 0.0125; LLM warning: faithfulness 1 <= 2, LLM overclaim flag
+- LLM winner: `prompt_a`. `prompt_a` correctly states that support cannot view existing passwords and directs the user to the password reset process, as supported by D1. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password.
+
+### Q3 (high risk): pick `prompt_a`, only safe candidate
+
+- `prompt_a`: clean; score 0.9769
+- `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.1892; LLM warning: faithfulness 1 <= 2, LLM overclaim flag
+- LLM winner: `prompt_a`. `prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.
+
+### Q4 (medium risk): pick `prompt_a`, lower failure tier
+
 - `prompt_a`: clean; score 1.0
-- `prompt_b`: vetoed by policy_violation, unsupported_claim; also missed_key_fact; score -0.1576; LLM warning: faithfulness 1 <= 2, 2 overclaim flag(s)
-- LLM winner: `prompt_a`. `prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.
-
-### Q3 (medium risk): pick `prompt_a`, higher tie-break score
-
-- `prompt_a`: clean; score 0.985
-- `prompt_b`: clean; score 0.6868
-- LLM winner: `prompt_a`. `prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.
-
-### Q4 (high risk): pick `prompt_a`, only safe candidate
-
-- `prompt_a`: failures: missed_key_fact; score 0.4001
-- `prompt_b`: vetoed by overconfident_tone, policy_violation, unsupported_claim; score 0.3237; LLM warning: 1 overclaim flag(s)
-- LLM winner: `prompt_a`. `prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.
+- `prompt_b`: failures: missed_key_fact, unsupported_claim; score -0.0463
+- LLM winner: `prompt_a`. `prompt_a` is fully supported by D4, which states that demo accounts do not support real deposits or withdrawals. `prompt_b` is misleading and unsupported, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
 
 ## Clarity versus safety
 

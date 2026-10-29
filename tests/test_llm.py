@@ -28,7 +28,7 @@ def _valid_payload(inputs, cfg, faith=4):
         labels = list(label_order(q.query_id, inputs.variants, cfg.llm.blind_labels))
         reviews.append({"query_id": q.query_id, "winner": labels[0],
                         "faithfulness": {l: faith for l in labels}, "clarity": {l: 4 for l in labels},
-                        "overclaim_flags": {l: [] for l in labels}, "justification": "ok"})
+                        "overclaim_flags": {l: False for l in labels}, "justification": "ok"})
     return {"reviews": reviews}
 
 
@@ -49,7 +49,7 @@ class FakeProvider:
 def test_validate_reply_rejects_unknown_variant_and_bad_scores():
     labels = {"Q1": {"answer_1": "a", "answer_2": "b"}}
     bad = {"reviews": [{"query_id": "Q1", "winner": "prompt_z", "faithfulness": {"answer_1": 9, "answer_2": 3},
-                        "clarity": {"answer_1": 3}, "overclaim_flags": {"answer_1": [], "answer_2": []}, "justification": "x"}]}
+                        "clarity": {"answer_1": 3}, "overclaim_flags": {"answer_1": False, "answer_2": False}, "justification": "x"}]}
     _, errors = validate_reply(bad, labels)
     joined = " ".join(errors)
     assert "winner 'prompt_z'" in joined and "outside 1-5" in joined and "clarity keys" in joined

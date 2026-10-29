@@ -27,7 +27,7 @@ python validate.py
 pytest
 ```
 
-With no API key, `run.py` replays the committed review from `outputs/llm_calls.jsonl` (it came from one real `gpt-4.1-2025-04-14` call: 1925 tokens in, 463 out, about 5 s). With a changed input or config and no key, it falls back to a stub review and says so in every artifact.
+With no API key, `run.py` replays the committed review from `outputs/llm_calls.jsonl` (it came from one real `gpt-4.1-2025-04-14` call: 1443 tokens in, 441 out, about 5 s). With a changed input or config and no key, it falls back to a stub review and says so in every artifact.
 
 Optional, a real review with OpenAI (default model `gpt-4.1-2025-04-14`, pinned):
 
@@ -53,11 +53,13 @@ python run.py
 |---|---|
 | `outputs/retrieval.json` | top 2 passages per query with BM25 scores |
 | `outputs/automated_scores.json` | one row per query and variant: the rule checks, `risk_flags`, `failures`, `notes` |
-| `outputs/llm_review.json` | `meta` (source `live`, `replay`, `stub` or `stub_fallback`, model, prompt hash and version, blind labels) and one review per query |
+| `outputs/llm_review.json` | one record per query in the brief's shape: `winner`, `faithfulness` and `clarity` (1 to 5), `overclaim_flags` (true or false per variant), `justification`, plus `review_source` (`live`, `replay`, `stub` or `stub_fallback`) |
+| `outputs/llm_review_meta.json` | the review's model, prompt name, version and hash, token budget and blind labels |
+| `outputs/failure_taxonomy.json` | the controlled vocabulary plus the tags given to each answer |
 | `outputs/llm_calls.jsonl` | append-only log of every attempt: mode, attempt, validity, error, tokens, latency, request and raw reply |
 | `outputs/recommendation.md` | the selected variant, ship status, summary table, top reasons, per-query reasoning, clarity versus safety, limitations |
 | `outputs/review_report.md` | per query: question, retrieved docs and scores, each answer, failed checks, LLM view, final pick |
-| `config/failure_taxonomy.json` | the controlled vocabulary every flag must come from |
+| `config/failure_taxonomy.json` | the source vocabulary every tag must come from |
 | `data/*.json` | the inputs; replace them with any fixtures that follow the same schema |
 
 Derived artifacts have sorted keys, fixed rounding and no timestamps, so two runs on the same inputs are byte-identical. CI checks that.
@@ -181,10 +183,13 @@ Overall, variants are ranked by fewest high-risk vetoes, then fewest vetoes, the
 
 ### Result on the sample data (live review, replayed)
 
-`prompt_a` is selected but **not ready to ship**:
+`prompt_a` is selected and **ready to ship**. It wins all four questions, and no blocker fires.
 
-- `prompt_b` is vetoed on both high-risk questions. On Q2 it promises approval within 24 hours, which is a banned claim, an invented number and low grounding. On Q4 it says "you will definitely see similar results in a live account".
-- `prompt_a` misses the key fact on Q4: it never says that demo funds have no cash value.
+- **Q1** (medium): `prompt_b` says the withdrawal is "guaranteed" and "instant". Both are banned claims, and "guaranteed" also trips the overconfident-tone check, so `prompt_b` is vetoed.
+- **Q2** (high): `prompt_b` offers to "send you your current password", a banned claim, and misses the key fact. Vetoed.
+- **Q3** (high): `prompt_b` says "a screenshot should be fine", a banned claim with low grounding (0.29). Vetoed.
+- **Q4** (medium): `prompt_b` says you "may be able to withdraw after your demo account is upgraded and verified". The banned phrase "yes, after verification" is not matched, because "verified" and "verification" do not share a stem in the light stemmer (a documented limit). The answer is still caught: it misses the key fact, its grounding is 0.43 (`unsupported_claim`), and the LLM flags it as an overclaim. It loses on tier.
+- The LLM review agrees: `prompt_a` has faithfulness 5 on every question and `prompt_b` has 1, with an overclaim flag on all four `prompt_b` answers.
 
 ## Validation
 
@@ -228,7 +233,7 @@ The LLM output is never regenerated. "Reproducible from the stored outputs" mean
 
 ## Limitations
 
-- The brief described the sample data, but its exact text did not reach this build. `data/` follows the description (D1 to D5, Q1 to Q4, `prompt_a` and `prompt_b`), and the cases were written so that each check passes on one answer and fails on another. Nothing in the code depends on the contents.
+- `data/` holds the brief's sample data exactly. Nothing in the code depends on its contents; the tests also run a third variant with renamed query IDs.
 - Thresholds and weights come from reasoning about these fixtures, not from a labelled calibration set. The next step is about 50 human-labelled answers, so that the judge and the rules can be measured on the failing class.
 - With four queries, "4 wins to 0" is an anecdote. Use it as a regression gate, not as a statistic.
 

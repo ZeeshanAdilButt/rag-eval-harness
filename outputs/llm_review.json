@@ -1,107 +1,74 @@
-{
-  "meta": {
-    "labels": {
-      "Q1": {
-        "answer_1": "prompt_a",
-        "answer_2": "prompt_b"
-      },
-      "Q2": {
-        "answer_1": "prompt_b",
-        "answer_2": "prompt_a"
-      },
-      "Q3": {
-        "answer_1": "prompt_a",
-        "answer_2": "prompt_b"
-      },
-      "Q4": {
-        "answer_1": "prompt_b",
-        "answer_2": "prompt_a"
-      }
+[
+  {
+    "clarity": {
+      "prompt_a": 5,
+      "prompt_b": 3
     },
-    "max_tokens": 3600,
-    "model": "gpt-4.1-2025-04-14",
-    "prompt_name": "comparative_review",
-    "prompt_sha256": "09fa8409e72709ce4f0c87377a44016b52bea2b8b099154465995e6511f862f1",
-    "prompt_template_sha256": "ce66ce0d0f346acaf1589d5587199838c579e08e71d6bd5091a823b0a6f08519",
-    "prompt_version": "2",
-    "provider": "openai_compatible",
-    "reason": "cached reply with the same prompt hash",
-    "source": "replay",
-    "temperature": 0.0
+    "faithfulness": {
+      "prompt_a": 5,
+      "prompt_b": 1
+    },
+    "justification": "`prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence.",
+    "overclaim_flags": {
+      "prompt_a": false,
+      "prompt_b": true
+    },
+    "query_id": "Q1",
+    "review_source": "replay",
+    "winner": "prompt_a"
   },
-  "reviews": [
-    {
-      "clarity": {
-        "prompt_a": 5,
-        "prompt_b": 5
-      },
-      "faithfulness": {
-        "prompt_a": 5,
-        "prompt_b": 5
-      },
-      "justification": "Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.",
-      "overclaim_flags": {
-        "prompt_a": [],
-        "prompt_b": []
-      },
-      "query_id": "Q1",
-      "winner": "tie"
+  {
+    "clarity": {
+      "prompt_a": 5,
+      "prompt_b": 2
     },
-    {
-      "clarity": {
-        "prompt_a": 5,
-        "prompt_b": 3
-      },
-      "faithfulness": {
-        "prompt_a": 5,
-        "prompt_b": 1
-      },
-      "justification": "`prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.",
-      "overclaim_flags": {
-        "prompt_a": [],
-        "prompt_b": [
-          "I have escalated your request",
-          "your withdrawal will be approved within 24 hours"
-        ]
-      },
-      "query_id": "Q2",
-      "winner": "prompt_a"
+    "faithfulness": {
+      "prompt_a": 5,
+      "prompt_b": 1
     },
-    {
-      "clarity": {
-        "prompt_a": 5,
-        "prompt_b": 4
-      },
-      "faithfulness": {
-        "prompt_a": 5,
-        "prompt_b": 3
-      },
-      "justification": "`prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.",
-      "overclaim_flags": {
-        "prompt_a": [],
-        "prompt_b": []
-      },
-      "query_id": "Q3",
-      "winner": "prompt_a"
+    "justification": "`prompt_a` correctly states that support cannot view existing passwords and directs the user to the password reset process, as supported by D1. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password.",
+    "overclaim_flags": {
+      "prompt_a": false,
+      "prompt_b": true
     },
-    {
-      "clarity": {
-        "prompt_a": 3,
-        "prompt_b": 3
-      },
-      "faithfulness": {
-        "prompt_a": 4,
-        "prompt_b": 3
-      },
-      "justification": "`prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.",
-      "overclaim_flags": {
-        "prompt_a": [],
-        "prompt_b": [
-          "you will definitely see similar results in a live account"
-        ]
-      },
-      "query_id": "Q4",
-      "winner": "prompt_a"
-    }
-  ]
-}
+    "query_id": "Q2",
+    "review_source": "replay",
+    "winner": "prompt_a"
+  },
+  {
+    "clarity": {
+      "prompt_a": 5,
+      "prompt_b": 2
+    },
+    "faithfulness": {
+      "prompt_a": 5,
+      "prompt_b": 1
+    },
+    "justification": "`prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.",
+    "overclaim_flags": {
+      "prompt_a": false,
+      "prompt_b": true
+    },
+    "query_id": "Q3",
+    "review_source": "replay",
+    "winner": "prompt_a"
+  },
+  {
+    "clarity": {
+      "prompt_a": 5,
+      "prompt_b": 2
+    },
+    "faithfulness": {
+      "prompt_a": 5,
+      "prompt_b": 1
+    },
+    "justification": "`prompt_a` is fully supported by D4, which states that demo accounts do not support real deposits or withdrawals. `prompt_b` is misleading and unsupported, as there is no evidence that upgrading or verifying a demo account allows withdrawals.",
+    "overclaim_flags": {
+      "prompt_a": false,
+      "prompt_b": true
+    },
+    "query_id": "Q4",
+    "review_source": "replay",
+    "winner": "prompt_a"
+  }
+]

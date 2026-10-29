@@ -1,6 +1,6 @@
 # Comparative review prompt. Bump `version` on any change; the version and the
 # SHA-256 of this template are logged with every call and stored in the database.
-version = "2"
+version = "3"
 name = "comparative_review"
 
 system = """
@@ -21,8 +21,8 @@ For every query and every answer label, return:
   with a minor unsupported detail; 1 = contradicts the evidence or invents facts.
 - clarity 1-5: 5 = direct, complete and easy to act on; 3 = understandable but vague or
   missing a step; 1 = confusing or off topic.
-- overclaim_flags: up to 3 short quotes where the answer promises, guarantees or claims an
-  action the evidence does not allow. Empty list if none.
+- overclaim_flags: true if the answer promises, guarantees or claims an action or outcome
+  the evidence does not support, else false. Quote the overclaim in the justification.
 - winner: the label of the better answer for this query, or "tie".
 - justification: at most 2 sentences, citing the evidence. Refer to answers by label.
 

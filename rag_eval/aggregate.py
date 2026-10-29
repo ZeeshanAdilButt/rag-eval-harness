@@ -21,9 +21,8 @@ def _llm_warnings(review: dict, variant: str, cfg: AggregateConfig) -> list[str]
     faith = review["faithfulness"][variant]
     if faith <= cfg.llm_block_faithfulness_max:
         out.append(f"faithfulness {faith} <= {cfg.llm_block_faithfulness_max}")
-    claims = review.get("overclaim_flags", {}).get(variant, [])
-    if cfg.llm_overclaim_blocks_high_risk and claims:
-        out.append(f"{len(claims)} overclaim flag(s)")
+    if cfg.llm_overclaim_blocks_high_risk and review.get("overclaim_flags", {}).get(variant):
+        out.append("LLM overclaim flag")
     return out
 
 

@@ -67,7 +67,7 @@ def test_validation_catches_tampering(tmp_path):
     rec.write_text(rec.read_text(encoding="utf-8").replace("prompt_a", "prompt_b", 1), encoding="utf-8")
     review = root / "outputs" / "llm_review.json"
     data = json.loads(review.read_text(encoding="utf-8"))
-    data["reviews"][0]["faithfulness"]["prompt_a"] = 6
+    data[0]["faithfulness"]["prompt_a"] = 6
     review.write_text(json.dumps(data), encoding="utf-8")
     errors = " ".join(validate(cfg, root))
     assert "outside 1-5" in errors

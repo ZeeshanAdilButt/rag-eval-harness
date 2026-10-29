@@ -13,7 +13,8 @@ from .report import render_recommendation, render_review_report
 from .retrieval import retrieve
 from .schema import InputError, load_inputs
 
-ARTIFACTS = ("retrieval.json", "automated_scores.json", "llm_review.json", "llm_calls.jsonl", "recommendation.md", "review_report.md")
+ARTIFACTS = ("retrieval.json", "automated_scores.json", "failure_taxonomy.json", "llm_review.json", "llm_review_meta.json",
+             "llm_calls.jsonl", "recommendation.md", "review_report.md")
 
 
 def validate(cfg: Config, root: Path) -> list[str]:
@@ -33,8 +34,8 @@ def validate(cfg: Config, root: Path) -> list[str]:
         return [f"missing artifact: {m}" for m in missing]
 
     loaded = {}
-    for name in ("retrieval.json", "automated_scores.json", "llm_review.json", str(cfg.paths.taxonomy)):
-        path = out / name if name.endswith(".json") and "/" not in name else root / name
+    for name in ("retrieval.json", "automated_scores.json", "failure_taxonomy.json", "llm_review.json", "llm_review_meta.json", str(cfg.paths.taxonomy)):
+        path = out / name if "/" not in name else root / name
         try:
             loaded[name] = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
@@ -78,7 +79,19 @@ def validate(cfg: Config, root: Path) -> list[str]:
         errors.append("automated_scores.json: differs from a fresh rule-check run")
 
     # llm review
-    meta, reviews = review.get("meta", {}), review.get("reviews", [])
+    meta = loaded["llm_review_meta.json"]
+    if not isinstance(review, list):
+        return errors + ["llm_review.json: expected a list of review records"]
+    reviews = [{k: v for k, v in r.items() if k != "review_source"} for r in review]
+    if any(r.get("review_source") != meta.get("source") for r in review):
+        errors.append("llm_review.json: review_source differs from llm_review_meta.json source")
+    assigned = loaded["failure_taxonomy.json"].get("assignments", [])
+    if sorted((a["query_id"], a["variant"], tuple(a["tags"])) for a in assigned) != sorted(
+        (s["query_id"], s["variant"], tuple(s["failures"])) for s in scores
+    ):
+        errors.append("failure_taxonomy.json: assignments differ from automated_scores.json failures")
+    if any(t not in codes for a in assigned for t in a["tags"]):
+        errors.append("failure_taxonomy.json: tag outside the controlled vocabulary")
     identity = {q: {v: v for v in inputs.variants} for q in qids}
     _, problems = validate_reply({"reviews": reviews}, identity)
     errors += [f"llm_review.json: {p}" for p in problems]

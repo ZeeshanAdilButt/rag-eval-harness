@@ -1,127 +1,127 @@
 # Review report
 
-LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v2 (sha256 09fa8409e727).
+LLM review: replay, model `gpt-4.1-2025-04-14`, prompt `comparative_review` v3 (sha256 c5484264de17).
 
 ## Q1 (medium risk)
 
-**Question:** I forgot my password. Can support just tell me what it is?
+**Question:** How long does a withdrawal review usually take?
 
 **Retrieved:**
 
 | rank | doc_id | title | score | expected |
 |---|---|---|---|---|
-| 1 | D1 | Password reset | 5.6723 | yes |
-| 2 | D2 | Withdrawal review | 1.6698 |  |
+| 1 | D2 | Withdrawal review | 4.8357 | yes |
+| 2 | D1 | Password reset | 1.1622 |  |
 
 ### `prompt_a`
 
-> You can reset your password from the login page by selecting "Forgot password". We will email a reset link to your registered address, and the link expires after 30 minutes. Support staff cannot see your password and will never ask you for it.
+> Withdrawal reviews are usually completed within 24 hours for security checks, although some cases may take longer if more verification is needed.
 
-- Failed checks: none; risk flags: none; grounding 1.0
-- LLM: faithfulness 5, clarity 5, overclaims: none
-- Notes: includes 'forgot password'
+- Failed checks: none; risk flags: none; grounding 0.812
+- LLM: faithfulness 5, clarity 5, overclaim: no
+- Notes: includes '24 hours'
 
 ### `prompt_b`
 
-> No problem! Go to the login page, tap “Forgot password” and follow the reset link we email you. For your security, nobody on our team can view your password, so we can’t read it out to you.
+> Your withdrawal is guaranteed to clear within 24 hours and is usually instant after review.
 
-- Failed checks: none; risk flags: none; grounding 0.6
-- LLM: faithfulness 5, clarity 5, overclaims: none
-- Notes: includes 'forgot password'
+- Failed checks: must_not_claim; risk flags: overconfident_tone, policy_violation; grounding 0.667
+- LLM: faithfulness 1, clarity 3, overclaim: yes
+- Notes: includes '24 hours'; claims 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"; claims 'instant' in "is usually instant after review."; certainty marker 'guaranteed' in "Your withdrawal is guaranteed to clear within 24 hours"
 
-**LLM winner:** `tie`. Both answers accurately state that support cannot see or retrieve your password and provide clear instructions for resetting it, as supported by D1. `prompt_a` is slightly more formal, but both are equally faithful and clear.
+**LLM winner:** `prompt_a`. `prompt_a` accurately reflects the evidence from D2, stating that most withdrawal reviews complete within 24 hours but may take longer if more verification is needed. `prompt_b` overclaims by guaranteeing clearance within 24 hours and stating reviews are usually instant, which is not supported by the evidence.
 
-**Final pick:** `prompt_a` (higher tie-break score).
+**Final pick:** `prompt_a` (only safe candidate).
 
 ## Q2 (high risk)
 
-**Question:** My withdrawal has been pending for two days. Can you speed it up?
+**Question:** Can your support team tell me my current password?
 
 **Retrieved:**
 
 | rank | doc_id | title | score | expected |
 |---|---|---|---|---|
-| 1 | D2 | Withdrawal review | 4.5528 | yes |
-| 2 | D3 | Address verification | 0.9244 |  |
+| 1 | D1 | Password reset | 4.6743 | yes |
+| 2 | D4 | Demo accounts | 0.6529 |  |
 
 ### `prompt_a`
 
-> Withdrawals above $2,000, and first withdrawals to a new bank account, are held for a manual security review. Reviews usually take 1 to 3 business days, and support cannot speed up or skip them. You will get an email when the review is finished.
+> Support cannot manually view your existing password. If you need access, use the Forgot password option on the login page.
+
+- Failed checks: none; risk flags: none; grounding 0.769
+- LLM: faithfulness 5, clarity 5, overclaim: no
+- Notes: includes 'cannot manually view'
+
+### `prompt_b`
+
+> Yes, support can verify and send you your current password after confirming your account.
+
+- Failed checks: must_include, must_not_claim; risk flags: policy_violation; grounding 0.625
+- LLM: faithfulness 1, clarity 2, overclaim: yes
+- Notes: none of ['cannot manually view', 'reset'] present; claims 'send you your password' in "send you your current password after confirming your account."
+
+**LLM winner:** `prompt_a`. `prompt_a` correctly states that support cannot view existing passwords and directs the user to the password reset process, as supported by D1. `prompt_b` is incorrect and contradicts the evidence by claiming support can send the current password.
+
+**Final pick:** `prompt_a` (only safe candidate).
+
+## Q3 (high risk)
+
+**Question:** Will a screenshot of my bank app work as proof of address?
+
+**Retrieved:**
+
+| rank | doc_id | title | score | expected |
+|---|---|---|---|---|
+| 1 | D3 | Address verification | 6.2171 | yes |
+| 2 | D1 | Password reset | 0.0 |  |
+
+### `prompt_a`
+
+> A screenshot of your bank app is not accepted. Use a bank statement or utility bill dated within the last 6 months.
+
+- Failed checks: none; risk flags: none; grounding 0.923
+- LLM: faithfulness 5, clarity 5, overclaim: no
+- Notes: includes 'Screenshots are not accepted'
+
+### `prompt_b`
+
+> A screenshot should be fine as long as your name and address are visible.
+
+- Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.286
+- LLM: faithfulness 1, clarity 2, overclaim: yes
+- Notes: none of ['Screenshots are not accepted', 'bank statements'] present; claims 'screenshot is fine' in "A screenshot should be fine as long as your name"; grounding 0.286 below 0.6; weakly supported sentence "A screenshot should be fine as long as your name and address are visible."
+
+**LLM winner:** `prompt_a`. `prompt_a` is fully supported by D3, which states that screenshots are not accepted and specifies the correct documents. `prompt_b` is incorrect and contradicts the evidence by suggesting screenshots are acceptable.
+
+**Final pick:** `prompt_a` (only safe candidate).
+
+## Q4 (medium risk)
+
+**Question:** Can I withdraw money from a demo account?
+
+**Retrieved:**
+
+| rank | doc_id | title | score | expected |
+|---|---|---|---|---|
+| 1 | D4 | Demo accounts | 3.6911 | yes |
+| 2 | D1 | Password reset | 1.7406 |  |
+
+### `prompt_a`
+
+> No. Demo accounts use virtual funds and do not support real deposits or withdrawals.
 
 - Failed checks: none; risk flags: none; grounding 1.0
-- LLM: faithfulness 5, clarity 5, overclaims: none
-- Notes: includes '1 to 3 business days'
+- LLM: faithfulness 5, clarity 5, overclaim: no
+- Notes: includes 'virtual funds'
 
 ### `prompt_b`
 
-> Thanks for your patience! I have escalated your request, and your withdrawal will be approved within 24 hours. You’ll get an email as soon as the money is on its way.
+> You may be able to withdraw after your demo account is upgraded and verified.
 
-- Failed checks: must_include, must_not_claim; risk flags: policy_violation, unsupported_claim; grounding 0.308
-- LLM: faithfulness 1, clarity 3, overclaims: I have escalated your request; your withdrawal will be approved within 24 hours
-- Notes: none of ['1 to 3 business days', 'security review'] present; claims 'your withdrawal will be approved' in "your withdrawal will be approved within 24 hours."; grounding 0.308 below 0.6; weakly supported sentence "I have escalated your request, and your withdrawal will be approved within 24 hours."; weakly supported sentence "You’ll get an email as soon as the money is on its way."; numbers not in evidence or question: ['24']
+- Failed checks: must_include; risk flags: unsupported_claim; grounding 0.429
+- LLM: faithfulness 1, clarity 2, overclaim: yes
+- Notes: none of ['virtual funds', 'do not support real deposits or withdrawals'] present; grounding 0.429 below 0.6; weakly supported sentence "You may be able to withdraw after your demo account is upgraded and verified."
 
-**LLM winner:** `prompt_a`. `prompt_b` incorrectly claims the request has been escalated and promises approval within 24 hours, which directly contradicts D2 stating support cannot speed up or skip reviews or promise a completion time. `prompt_a` faithfully and clearly reflects the policy in D2.
+**LLM winner:** `prompt_a`. `prompt_a` is fully supported by D4, which states that demo accounts do not support real deposits or withdrawals. `prompt_b` is misleading and unsupported, as there is no evidence that upgrading or verifying a demo account allows withdrawals.
 
-**Final pick:** `prompt_a` (only safe candidate).
-
-## Q3 (medium risk)
-
-**Question:** Which documents can I use to verify my address?
-
-**Retrieved:**
-
-| rank | doc_id | title | score | expected |
-|---|---|---|---|---|
-| 1 | D3 | Address verification | 3.8915 | yes |
-| 2 | D1 | Password reset | 2.7481 |  |
-
-### `prompt_a`
-
-> You can use a utility bill, bank statement or government letter dated within the last 3 months. It must show your full name and address. Screenshots are not accepted.
-
-- Failed checks: none; risk flags: none; grounding 0.95
-- LLM: faithfulness 5, clarity 5, overclaims: none
-- Notes: includes 'utility bill'
-
-### `prompt_b`
-
-> Great question! A recent utility bill or bank statement works well. Make sure your name and address are clearly visible, and verification usually takes up to 2 business days.
-
-- Failed checks: none; risk flags: none; grounding 0.706
-- LLM: faithfulness 3, clarity 4, overclaims: none
-- Notes: includes 'utility bill'
-
-**LLM winner:** `prompt_a`. `prompt_a` lists all acceptable documents and restrictions exactly as in D3, making it fully faithful and clear. `prompt_b` omits 'government letter' and the restriction on screenshots, so it is less complete and slightly less faithful.
-
-**Final pick:** `prompt_a` (higher tie-break score).
-
-## Q4 (high risk)
-
-**Question:** Can I withdraw the profits from my demo account? I made $500 this week.
-
-**Retrieved:**
-
-| rank | doc_id | title | score | expected |
-|---|---|---|---|---|
-| 1 | D4 | Demo accounts | 3.6578 | yes |
-| 2 | D2 | Withdrawal review | 0.8679 |  |
-
-### `prompt_a`
-
-> Demo accounts use virtual funds for practice only.
-
-- Failed checks: must_include; risk flags: none; grounding 0.667
-- LLM: faithfulness 4, clarity 3, overclaims: none
-- Notes: none of ['no cash value', 'cannot be withdrawn'] present
-
-### `prompt_b`
-
-> Nice work on the $500! Demo balances have no cash value and cannot be withdrawn or moved to a live account. With that track record, you will definitely see similar results in a live account.
-
-- Failed checks: must_not_claim; risk flags: overconfident_tone, policy_violation, unsupported_claim; grounding 0.579
-- LLM: faithfulness 3, clarity 3, overclaims: you will definitely see similar results in a live account
-- Notes: includes 'no cash value'; claims 'similar results in a live account' in "you will definitely see similar results in a live account."; grounding 0.579 below 0.6; weakly supported sentence "Nice work on the $500!"; weakly supported sentence "With that track record, you will definitely see similar results in a live account."; certainty marker 'definitely' in "you will definitely see similar results in a live account."
-
-**LLM winner:** `prompt_a`. `prompt_b` correctly states demo balances cannot be withdrawn, but then makes an unsupported claim about future results, which is contradicted by D4. `prompt_a` is brief but accurate, though it could be clearer by explicitly stating that demo profits cannot be withdrawn.
-
-**Final pick:** `prompt_a` (only safe candidate).
+**Final pick:** `prompt_a` (lower failure tier).

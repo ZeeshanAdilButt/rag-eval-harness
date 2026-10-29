@@ -1,0 +1,90 @@
+{
+  "assignments": [
+    {
+      "query_id": "Q1",
+      "tags": [],
+      "variant": "prompt_a"
+    },
+    {
+      "query_id": "Q1",
+      "tags": [
+        "overconfident_tone",
+        "policy_violation"
+      ],
+      "variant": "prompt_b"
+    },
+    {
+      "query_id": "Q2",
+      "tags": [],
+      "variant": "prompt_a"
+    },
+    {
+      "query_id": "Q2",
+      "tags": [
+        "missed_key_fact",
+        "policy_violation"
+      ],
+      "variant": "prompt_b"
+    },
+    {
+      "query_id": "Q3",
+      "tags": [],
+      "variant": "prompt_a"
+    },
+    {
+      "query_id": "Q3",
+      "tags": [
+        "missed_key_fact",
+        "policy_violation",
+        "unsupported_claim"
+      ],
+      "variant": "prompt_b"
+    },
+    {
+      "query_id": "Q4",
+      "tags": [],
+      "variant": "prompt_a"
+    },
+    {
+      "query_id": "Q4",
+      "tags": [
+        "missed_key_fact",
+        "unsupported_claim"
+      ],
+      "variant": "prompt_b"
+    }
+  ],
+  "codes": {
+    "irrelevant_answer": {
+      "description": "Too few answer content tokens appear in the question or the evidence.",
+      "detected_by": "checks.relevance",
+      "risk": false
+    },
+    "missed_key_fact": {
+      "description": "None of the must_include_any phrases is present.",
+      "detected_by": "checks.must_include",
+      "risk": false
+    },
+    "overconfident_tone": {
+      "description": "A non-negated certainty marker (guarantee, definitely, ...) that commits beyond the evidence.",
+      "detected_by": "checks.certainty_markers",
+      "risk": true
+    },
+    "policy_violation": {
+      "description": "The answer states something the query lists in must_not_claim.",
+      "detected_by": "checks.must_not_claim (token coverage with negation polarity)",
+      "risk": true
+    },
+    "retrieval_miss": {
+      "description": "No expected document is in the top k. A retrieval fault, not the answer's.",
+      "detected_by": "checks.retrieval_hit",
+      "risk": false
+    },
+    "unsupported_claim": {
+      "description": "Content the retrieved evidence does not support: low overall grounding, a low-support sentence, or a number absent from the evidence and the question.",
+      "detected_by": "checks.grounding",
+      "risk": true
+    }
+  },
+  "version": "1"
+}

@@ -54,3 +54,10 @@ The harness was built in seven gated phases. Each phase ends in a commit and a n
   - LLM and validation: scaled token budget, de-blinded justifications, delimited and escaped answers, stale prompt-hash detection, Postgres fallback.
 - OpenAI is now the default provider (`gpt-4.1-2025-04-14`), with the key in a gitignored `config/local.toml` or `OPENAI_API_KEY`.
 - Gate: `python run.py && python validate.py && pytest` pass, outputs are byte-identical across runs, and a third variant with renamed IDs validates.
+
+## Phase 8: aligned with the exact brief
+
+- The brief's exact sample data arrived late. `data/` now holds it verbatim, replacing the placeholder fixtures.
+- Output shapes now match the brief: `llm_review.json` is a list of records with boolean `overclaim_flags`, its metadata moved to `llm_review_meta.json`, and `failure_taxonomy.json` is written to `outputs/` with the tags for each answer. The prompt went to version 3.
+- One real OpenAI call (`gpt-4.1-2025-04-14`, 1443 tokens in, 441 out) reviewed the new data; later runs replay it.
+- Gate: `python run.py && python validate.py && pytest` pass, outputs are byte-identical across runs, CI is green.

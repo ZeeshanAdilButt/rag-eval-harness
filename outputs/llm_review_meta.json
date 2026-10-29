@@ -1,0 +1,30 @@
+{
+  "labels": {
+    "Q1": {
+      "answer_1": "prompt_a",
+      "answer_2": "prompt_b"
+    },
+    "Q2": {
+      "answer_1": "prompt_b",
+      "answer_2": "prompt_a"
+    },
+    "Q3": {
+      "answer_1": "prompt_a",
+      "answer_2": "prompt_b"
+    },
+    "Q4": {
+      "answer_1": "prompt_b",
+      "answer_2": "prompt_a"
+    }
+  },
+  "max_tokens": 3600,
+  "model": "gpt-4.1-2025-04-14",
+  "prompt_name": "comparative_review",
+  "prompt_sha256": "c5484264de178e607f98965ec73f39ef6b7c4dc78e11b24be5760415783b1d37",
+  "prompt_template_sha256": "f0ef28cf69b1c19620c998b17eb5a86530cc4c02e46ea99649dd639494ada2ce",
+  "prompt_version": "3",
+  "provider": "openai_compatible",
+  "reason": "cached reply with the same prompt hash",
+  "source": "replay",
+  "temperature": 0.0
+}

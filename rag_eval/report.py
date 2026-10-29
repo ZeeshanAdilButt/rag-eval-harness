@@ -109,7 +109,7 @@ def render_review_report(queries: list[dict], answers: dict, retrieval: list[dic
             failed = [n for n, ok in (("retrieval_hit", s["retrieval_hit"]), ("must_include", s["must_include_pass"]), ("must_not_claim", s["must_not_claim_pass"])) if not ok]
             lines += [f"### `{v}`", "", f"> {answers[qid][v]}", ""]
             lines.append(f"- Failed checks: {', '.join(failed) or 'none'}; risk flags: {', '.join(s['risk_flags'])}; grounding {s['grounding_score']}")
-            lines.append(f"- LLM: faithfulness {rv['faithfulness'][v]}, clarity {rv['clarity'][v]}, overclaims: {'; '.join(rv['overclaim_flags'][v]) or 'none'}")
+            lines.append(f"- LLM: faithfulness {rv['faithfulness'][v]}, clarity {rv['clarity'][v]}, overclaim: {'yes' if rv['overclaim_flags'][v] else 'no'}")
             lines.append(f"- Notes: {s['notes']}")
             lines.append("")
         lines += [f"**LLM winner:** `{rv['winner']}`. {rv['justification']}", "", f"**Final pick:** `{pq['winner']}` ({pq['reason']}).", ""]
